@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Lock01 } from "@untitledui/icons";
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
 import {
@@ -68,11 +67,10 @@ export function PasswordGate({ onSuccess }: PasswordGateProps) {
     return (
         <div className="trip-surface flex min-h-dvh flex-col">
             <div className="trip-hero px-4 py-10 text-center sm:px-6">
-                <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-[var(--trip-accent-soft)]">
-                    <Lock01 className="size-8 text-[var(--trip-accent)]" />
-                </div>
-                <h1 className="trip-hero-title mt-5">Trip hub</h1>
-                <p className="trip-hero-meta mt-2">Twain Harte · Jun 23–27, 2026</p>
+                <p className="trip-hero-label">Patterson reunion</p>
+                <h1 className="trip-hero-title mt-2">Twain Harte</h1>
+                <p className="trip-hero-dates mt-1">Jun 23–27, 2026</p>
+                <p className="trip-hero-meta mx-auto mt-2 max-w-sm">Family password required.</p>
             </div>
 
             <div className="mx-auto w-full max-w-md flex-1 px-4 py-8 sm:px-6">

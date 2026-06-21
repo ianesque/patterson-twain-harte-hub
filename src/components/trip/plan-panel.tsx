@@ -1,11 +1,79 @@
+import type { ComponentType } from "react";
+import { useEffect, useRef, useState } from "react";
+import {
+    Camera01,
+    Clock,
+    Compass03,
+    HomeLine,
+    MarkerPin01,
+    Stars02,
+    Sun,
+} from "@untitledui/icons";
 import { TextArea } from "@/components/base/textarea/textarea";
 import { DAYS, TRIP_META } from "@/data/trip-content";
 import { DayHeader, EffortBox, getTripDayHighlight, PanelHeader } from "@/components/trip/trip-ui";
 import { useTrip } from "@/providers/trip-provider";
 import { cx } from "@/utils/cx";
 
+const ROW_ICON_MAP: Record<string, ComponentType<{ className?: string }>> = {
+    "🏠": HomeLine,
+    "🚗": MarkerPin01,
+    "🏊": Sun,
+    "🍦": Sun,
+    "⛵": Compass03,
+    "🏖️": Sun,
+    "⏰": Clock,
+    "📸": Camera01,
+    "🐟": Compass03,
+    "🎣": Compass03,
+    "🎬": Stars02,
+    "🚣": Compass03,
+    "🥾": Compass03,
+    "🛍️": MarkerPin01,
+    "🏡": HomeLine,
+};
+
+function PlanRowIcon({ emoji }: { emoji: string }) {
+    const Icon = ROW_ICON_MAP[emoji] ?? Compass03;
+    return (
+        <span className="trip-plan-row-icon" aria-hidden>
+            <Icon />
+        </span>
+    );
+}
+
 export function PlanPanel() {
     const { state, updateDayNotes } = useTrip();
+    const [activeDay, setActiveDay] = useState<string>(DAYS[0]?.id ?? "");
+    const observerRef = useRef<IntersectionObserver | null>(null);
+
+    useEffect(() => {
+        observerRef.current?.disconnect();
+
+        observerRef.current = new IntersectionObserver(
+            (entries) => {
+                const visible = entries
+                    .filter((entry) => entry.isIntersecting)
+                    .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+                if (visible?.target.id.startsWith("day-")) {
+                    setActiveDay(visible.target.id.replace("day-", ""));
+                }
+            },
+            { rootMargin: "-30% 0px -55% 0px", threshold: [0, 0.25, 0.5] },
+        );
+
+        for (const day of DAYS) {
+            const el = document.getElementById(`day-${day.id}`);
+            if (el) observerRef.current.observe(el);
+        }
+
+        return () => observerRef.current?.disconnect();
+    }, []);
+
+    function scrollToDay(dayId: string) {
+        setActiveDay(dayId);
+        document.getElementById(`day-${dayId}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
 
     return (
         <div className="space-y-6">
@@ -18,20 +86,24 @@ export function PlanPanel() {
                 </a>
             </p>
 
-            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                {DAYS.map((day) => (
-                    <a
-                        key={day.id}
-                        href={`#day-${day.id}`}
-                        className="inline-flex shrink-0 flex-col items-center rounded-2xl border border-[var(--trip-separator)] bg-primary px-4 py-2.5 text-center shadow-xs transition-colors active:bg-secondary"
-                    >
-                        <span className="text-[var(--trip-caption)] font-bold uppercase text-tertiary">{day.weekday}</span>
-                        <span className="text-[1.375rem] font-bold leading-none tracking-tight text-primary">{day.dayNum}</span>
-                    </a>
-                ))}
+            <div className="trip-day-chip-row">
+                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                    {DAYS.map((day) => (
+                        <button
+                            key={day.id}
+                            type="button"
+                            data-active={activeDay === day.id}
+                            className="trip-day-chip"
+                            onClick={() => scrollToDay(day.id)}
+                        >
+                            <span className="text-[var(--trip-caption)] font-bold uppercase text-tertiary">{day.weekday}</span>
+                            <span className="text-[1.375rem] font-bold leading-none tracking-tight text-primary">{day.dayNum}</span>
+                        </button>
+                    ))}
+                </div>
             </div>
 
-            {DAYS.map((day) => {
+            {DAYS.map((day, index) => {
                 const highlight = getTripDayHighlight(day.id);
 
                 return (
@@ -39,9 +111,10 @@ export function PlanPanel() {
                         key={day.id}
                         id={`day-${day.id}`}
                         className={cx(
-                            "trip-card scroll-mt-28 overflow-hidden",
+                            "trip-card trip-plan-card scroll-mt-24 overflow-hidden sm:scroll-mt-28",
                             (highlight === "today" || highlight === "upcoming") && "ring-2 ring-[var(--trip-accent)]/40",
                         )}
+                        style={{ animationDelay: `${0.03 + index * 0.03}s` }}
                     >
                         <header className="border-b border-[var(--trip-separator)] bg-secondary px-4 py-4 sm:px-5">
                             <DayHeader
@@ -56,12 +129,15 @@ export function PlanPanel() {
                         </header>
                         <div className="space-y-3 px-4 py-4">
                             {day.rows.map((row) => (
-                                <div key={row.title} className="flex gap-3.5 text-[var(--trip-body-sm)] leading-relaxed sm:text-[var(--trip-body)]">
-                                    <span className="mt-0.5 text-[1.375rem] leading-none" aria-hidden>
-                                        {row.icon}
-                                    </span>
+                                <div key={row.title} className="flex gap-3 text-[var(--trip-body-sm)] leading-relaxed sm:text-[var(--trip-body)]">
+                                    <PlanRowIcon emoji={row.icon} />
                                     <p>
-                                        <span className="font-semibold text-primary">{row.title}</span> {row.body}
+                                        <span className="font-semibold text-primary">{row.title}</span>
+                                        <span className="trip-plan-row-sep" aria-hidden>
+                                            {" "}
+                                            —{" "}
+                                        </span>
+                                        {row.body}
                                     </p>
                                 </div>
                             ))}

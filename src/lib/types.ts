@@ -16,14 +16,46 @@ export interface ChecklistItem {
     doneAt?: string;
 }
 
+export interface HouseholdActivityPlan {
+    optionId: string;
+    count: number;
+    confirmed: boolean;
+}
+
+export interface CustomActivity {
+    id: string;
+    dayId: DayId;
+    title: string;
+    description?: string;
+    emoji?: string;
+    createdBy?: string;
+    createdAt?: string;
+}
+
+export interface ActivityOverride {
+    title?: string;
+    description?: string;
+    emoji?: string;
+}
+
 export interface TripCollaborationState {
     meals: Partial<Record<DayId, Partial<Record<MealType, MealSlot>>>>;
     activityChoices: Partial<Record<DayId, { optionId: string; notes?: string }>>;
-    /** rsvpKey → household → option id from SPLITTABLE_ACTIVITIES */
-    activitySignups: Record<string, Record<string, string>>;
+    /** rsvpKey → household → plan for that outing */
+    activitySignups: Record<string, Record<string, HouseholdActivityPlan>>;
+    /** household → default group size for headcounts */
+    householdSizes: Record<string, number>;
     rsvps: Record<string, Record<string, RsvpStatus>>;
     checklist: Record<string, ChecklistItem>;
     dayNotes: Partial<Record<DayId, string>>;
+    /** User-added outings visible on Coordinate → Who's going */
+    customActivities: CustomActivity[];
+    /** rsvpKey → display overrides for built-in activities */
+    activityOverrides: Record<string, ActivityOverride>;
+    /** household/member name → avatar id */
+    memberAvatars: Record<string, string>;
+    /** roomId → household that claimed a TBD room */
+    roomAssignments: Record<string, string>;
 }
 
 export interface TripStateRow {
@@ -41,16 +73,30 @@ export const DEFAULT_PLANNER_SUGGESTIONS = [
     "Darren & Alicia",
     "Gabe",
     "Dick, Jan & Ryan",
-];
+] as const;
+
+/** Fixed headcounts per household — used to cap activity signups. */
+export const DEFAULT_HOUSEHOLD_SIZES: Record<string, number> = {
+    "Ian & Kimberly": 5,
+    "Ben & Stephanie": 6,
+    "Darren & Alicia": 5,
+    Gabe: 1,
+    "Dick, Jan & Ryan": 3,
+};
 
 export function emptyCollaborationState(): TripCollaborationState {
     return {
         meals: {},
         activityChoices: {},
         activitySignups: {},
+        householdSizes: {},
         rsvps: {},
         checklist: {},
         dayNotes: {},
+        customActivities: [],
+        activityOverrides: {},
+        memberAvatars: {},
+        roomAssignments: {},
     };
 }
 

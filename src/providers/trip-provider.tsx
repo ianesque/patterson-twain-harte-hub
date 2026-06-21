@@ -1,16 +1,22 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { getStoredMember } from "@/lib/auth";
+import { clearStoredMember, getStoredMember } from "@/lib/auth";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import {
     emptyCollaborationState,
     TRIP_STATE_ID,
+    rsvpKey,
+    type ActivityOverride,
     type ChecklistItem,
+    type CustomActivity,
     type DayId,
+    type HouseholdActivityPlan,
     type MealSlot,
     type MealType,
     type RsvpStatus,
     type TripCollaborationState,
 } from "@/lib/types";
+import { newCustomActivityId } from "@/lib/activities";
+import { normalizeActivitySignups } from "@/lib/activity-signups";
 
 type SyncStatus = "loading" | "connected" | "offline" | "error";
 
@@ -19,15 +25,24 @@ interface TripContextValue {
     syncStatus: SyncStatus;
     lastUpdatedBy: string | null;
     lastUpdatedAt: string | null;
+    savedFlash: boolean;
     memberName: string | null;
     setMemberName: (name: string) => void;
+    clearMember: () => void;
     updateMeal: (dayId: DayId, meal: MealType, patch: Partial<MealSlot>) => void;
     updateDayNotes: (dayId: DayId, notes: string) => void;
     setRsvp: (key: string, member: string, status: RsvpStatus) => void;
     setActivitySignup: (key: string, member: string, optionId: string | null) => void;
+    setActivityPlan: (key: string, household: string, plan: HouseholdActivityPlan | null) => void;
+    setHouseholdSize: (household: string, size: number) => void;
     setActivityChoice: (dayId: DayId, optionId: string, notes?: string) => void;
     toggleChecklist: (key: string) => void;
     resetChecklist: () => void;
+    addCustomActivity: (activity: Omit<CustomActivity, "id" | "createdAt" | "createdBy">) => string;
+    updateCustomActivity: (id: string, patch: Partial<Pick<CustomActivity, "dayId" | "title" | "description" | "emoji">>) => void;
+    deleteCustomActivity: (id: string) => void;
+    setActivityOverride: (key: string, patch: ActivityOverride | null) => void;
+    setRoomAssignment: (roomId: string, household: string | null) => void;
 }
 
 const TripContext = createContext<TripContextValue | null>(null);
@@ -35,7 +50,7 @@ const TripContext = createContext<TripContextValue | null>(null);
 const LOCAL_KEY = "twain_harte_collab_v1";
 
 function normalizeState(payload: Partial<TripCollaborationState> | null | undefined): TripCollaborationState {
-    return { ...emptyCollaborationState(), ...payload };
+    return normalizeActivitySignups({ ...emptyCollaborationState(), ...payload });
 }
 
 function loadLocalState(): TripCollaborationState {
@@ -62,8 +77,10 @@ export function TripProvider({ children }: { children: ReactNode }) {
     const [lastUpdatedBy, setLastUpdatedBy] = useState<string | null>(null);
     const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null);
     const [memberName, setMemberNameState] = useState<string | null>(() => getStoredMember());
+    const [savedFlash, setSavedFlash] = useState(false);
     const pendingWrite = useRef(false);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const savedFlashRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const persist = useCallback(
         (next: TripCollaborationState, updatedBy: string | null) => {
@@ -158,23 +175,36 @@ export function TripProvider({ children }: { children: ReactNode }) {
             cancelled = true;
             void client.removeChannel(channel);
             if (debounceRef.current) clearTimeout(debounceRef.current);
+            if (savedFlashRef.current) clearTimeout(savedFlashRef.current);
         };
     }, [applyRemote]);
+
+    const flashSaved = useCallback(() => {
+        setSavedFlash(true);
+        if (savedFlashRef.current) clearTimeout(savedFlashRef.current);
+        savedFlashRef.current = setTimeout(() => setSavedFlash(false), 2500);
+    }, []);
 
     const mutate = useCallback(
         (updater: (prev: TripCollaborationState) => TripCollaborationState) => {
             setState((prev) => {
                 const next = updater(prev);
                 persist(next, memberName);
+                if (memberName) flashSaved();
                 return next;
             });
         },
-        [memberName, persist],
+        [memberName, persist, flashSaved],
     );
 
     const setMemberName = useCallback((name: string) => {
         setMemberNameState(name);
         localStorage.setItem("twain_harte_member", name);
+    }, []);
+
+    const clearMember = useCallback(() => {
+        setMemberNameState(null);
+        clearStoredMember();
     }, []);
 
     const updateMeal = useCallback(
@@ -219,7 +249,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
             mutate((prev) => {
                 const current = { ...(prev.activitySignups[key] ?? {}) };
                 if (optionId) {
-                    current[member] = optionId;
+                    current[member] = { optionId, count: 0, confirmed: true };
                 } else {
                     delete current[member];
                 }
@@ -231,6 +261,38 @@ export function TripProvider({ children }: { children: ReactNode }) {
                     },
                 };
             });
+        },
+        [mutate],
+    );
+
+    const setActivityPlan = useCallback(
+        (key: string, household: string, plan: HouseholdActivityPlan | null) => {
+            mutate((prev) => {
+                const current = { ...(prev.activitySignups[key] ?? {}) };
+                if (plan) {
+                    current[household] = plan;
+                } else {
+                    delete current[household];
+                }
+                return {
+                    ...prev,
+                    activitySignups: {
+                        ...prev.activitySignups,
+                        [key]: current,
+                    },
+                };
+            });
+        },
+        [mutate],
+    );
+
+    const setHouseholdSize = useCallback(
+        (household: string, size: number) => {
+            const clamped = Math.min(12, Math.max(1, size));
+            mutate((prev) => ({
+                ...prev,
+                householdSizes: { ...prev.householdSizes, [household]: clamped },
+            }));
         },
         [mutate],
     );
@@ -270,36 +332,173 @@ export function TripProvider({ children }: { children: ReactNode }) {
         mutate((prev) => ({ ...prev, checklist: {} }));
     }, [mutate]);
 
+    const addCustomActivity = useCallback(
+        (activity: Omit<CustomActivity, "id" | "createdAt" | "createdBy">) => {
+            const id = newCustomActivityId();
+            mutate((prev) => ({
+                ...prev,
+                customActivities: [
+                    ...(prev.customActivities ?? []),
+                    {
+                        ...activity,
+                        id,
+                        title: activity.title.trim(),
+                        description: activity.description?.trim() || undefined,
+                        emoji: activity.emoji?.trim() || undefined,
+                        createdBy: memberName ?? undefined,
+                        createdAt: new Date().toISOString(),
+                    },
+                ],
+            }));
+            return id;
+        },
+        [memberName, mutate],
+    );
+
+    const updateCustomActivity = useCallback(
+        (id: string, patch: Partial<Pick<CustomActivity, "dayId" | "title" | "description" | "emoji">>) => {
+            mutate((prev) => {
+                const existing = (prev.customActivities ?? []).find((activity) => activity.id === id);
+                if (!existing) return prev;
+
+                const nextActivity: CustomActivity = {
+                    ...existing,
+                    ...patch,
+                    title: patch.title !== undefined ? patch.title.trim() : existing.title,
+                    description:
+                        patch.description !== undefined ? patch.description.trim() || undefined : existing.description,
+                    emoji: patch.emoji !== undefined ? patch.emoji.trim() || undefined : existing.emoji,
+                };
+
+                const oldKey = rsvpKey(existing.dayId, id);
+                const newKey = rsvpKey(nextActivity.dayId, id);
+                const nextSignups = { ...prev.activitySignups };
+
+                if (oldKey !== newKey && nextSignups[oldKey]) {
+                    nextSignups[newKey] = { ...(nextSignups[newKey] ?? {}), ...nextSignups[oldKey] };
+                    delete nextSignups[oldKey];
+                }
+
+                return {
+                    ...prev,
+                    activitySignups: nextSignups,
+                    customActivities: (prev.customActivities ?? []).map((activity) =>
+                        activity.id === id ? nextActivity : activity,
+                    ),
+                };
+            });
+        },
+        [mutate],
+    );
+
+    const deleteCustomActivity = useCallback(
+        (id: string) => {
+            mutate((prev) => {
+                const existing = (prev.customActivities ?? []).find((activity) => activity.id === id);
+                if (!existing) return prev;
+
+                const key = rsvpKey(existing.dayId, id);
+                const nextSignups = { ...prev.activitySignups };
+                delete nextSignups[key];
+
+                return {
+                    ...prev,
+                    activitySignups: nextSignups,
+                    customActivities: (prev.customActivities ?? []).filter((activity) => activity.id !== id),
+                };
+            });
+        },
+        [mutate],
+    );
+
+    const setActivityOverride = useCallback(
+        (key: string, patch: ActivityOverride | null) => {
+            mutate((prev) => {
+                const current = { ...(prev.activityOverrides ?? {}) };
+                if (!patch) {
+                    delete current[key];
+                } else {
+                    const cleaned: ActivityOverride = {};
+                    if (patch.title?.trim()) cleaned.title = patch.title.trim();
+                    if (patch.description !== undefined) cleaned.description = patch.description;
+                    if (patch.emoji?.trim()) cleaned.emoji = patch.emoji.trim();
+
+                    if (Object.keys(cleaned).length === 0) {
+                        delete current[key];
+                    } else {
+                        current[key] = cleaned;
+                    }
+                }
+
+                return { ...prev, activityOverrides: current };
+            });
+        },
+        [mutate],
+    );
+
+    const setRoomAssignment = useCallback(
+        (roomId: string, household: string | null) => {
+            mutate((prev) => {
+                const current = { ...(prev.roomAssignments ?? {}) };
+                if (household) {
+                    current[roomId] = household;
+                } else {
+                    delete current[roomId];
+                }
+                return { ...prev, roomAssignments: current };
+            });
+        },
+        [mutate],
+    );
+
     const value = useMemo(
         () => ({
             state,
             syncStatus,
             lastUpdatedBy,
             lastUpdatedAt,
+            savedFlash,
             memberName,
             setMemberName,
+            clearMember,
             updateMeal,
             updateDayNotes,
             setRsvp,
             setActivitySignup,
+            setActivityPlan,
+            setHouseholdSize,
             setActivityChoice,
             toggleChecklist,
             resetChecklist,
+            addCustomActivity,
+            updateCustomActivity,
+            deleteCustomActivity,
+            setActivityOverride,
+            setRoomAssignment,
         }),
         [
             state,
             syncStatus,
             lastUpdatedBy,
             lastUpdatedAt,
+            savedFlash,
             memberName,
             setMemberName,
+            clearMember,
             updateMeal,
             updateDayNotes,
             setRsvp,
             setActivitySignup,
+            setActivityPlan,
+            setHouseholdSize,
             setActivityChoice,
             toggleChecklist,
             resetChecklist,
+            addCustomActivity,
+            updateCustomActivity,
+            deleteCustomActivity,
+            setActivityOverride,
+            setRoomAssignment,
         ],
     );
 

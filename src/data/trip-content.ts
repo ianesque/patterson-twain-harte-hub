@@ -29,6 +29,7 @@ export interface SplittableActivity {
     dayId: DayId;
     title: string;
     description: string;
+    emoji: string;
     /** Shown as selected until the household taps to confirm or change */
     defaultOptionId: string;
     options: ActivityOption[];
@@ -81,11 +82,6 @@ export const DAYS: DayPlan[] = [
                 body: "Stop for groceries and firewood in Sonora on the way up.",
             },
             {
-                icon: "🚗",
-                title: "Stagger arrivals",
-                body: "No fixed schedule after check-in — keep the evening easy.",
-            },
-            {
                 icon: "🏊",
                 title: "Pool",
                 body: "Unwind after the drive. Draft Game Night teams if kids are up for it.",
@@ -110,12 +106,12 @@ export const DAYS: DayPlan[] = [
             {
                 icon: "⛵",
                 title: "Party boat",
-                body: "Book a 2-hour morning slot (before noon). Cooler + lunch on board. Two boats if needed for 18.",
+                body: "Book a 2-hour morning slot (before noon). Cooler + lunch on board. Two boats if needed for 20.",
             },
             {
                 icon: "🏖️",
-                title: "Beach 1",
-                body: "Buoyed swim area — good for the little ones. Snack bar and restrooms on site.",
+                title: "Pinecrest Non-Boater Activities",
+                body: "Beach, kayaks, and lakeshore for anyone skipping the boat. Buoyed swim area — snack bar and restrooms on site.",
             },
             {
                 icon: "⏰",
@@ -142,7 +138,7 @@ export const DAYS: DayPlan[] = [
             {
                 icon: "🐟",
                 title: "Fish hatchery",
-                body: "Bring quarters to feed trout. Open 7:30 AM–3:30 PM.",
+                body: "Optional for whoever wants to go — bring quarters to feed trout. Open 7:30 AM–3:30 PM.",
             },
             {
                 icon: "🎣",
@@ -192,21 +188,21 @@ export const DAYS: DayPlan[] = [
         id: "sat-27",
         weekday: "SAT",
         dayNum: "27",
-        title: "Hike & head home",
-        theme: "Easy outing · pack up",
+        title: "Checkout & head home",
+        theme: "Pack up · Columbia on the way",
         tag: "Flexible",
         tagTone: "easy",
-        effortAccess: "Columbia is flat and walkable — ~30 min toward Sonora.",
+        effortAccess: "Columbia State Historic Park is flat and walkable — ~30 min toward Sonora, easy to stop on the drive home.",
         rows: [
             {
-                icon: "🥾",
-                title: "Morning outing",
-                body: "Columbia State Historic Park — gold-rush town, shops, stagecoach, gold panning.",
+                icon: "📦",
+                title: "Checkout & pack up",
+                body: "Leave in waves. Final pool dip if there's time.",
             },
             {
-                icon: "📦",
-                title: "Pack up",
-                body: "Leave in waves. Final pool dip if there's time.",
+                icon: "🛍️",
+                title: "Columbia on the way home",
+                body: "Stop at Columbia State Historic Park on the drive toward Sonora — gold-rush town, shops, stagecoach, gold panning.",
             },
         ],
     },
@@ -224,61 +220,127 @@ export function dayShortLabel(dayId: DayId): string {
 
 export const SPLITTABLE_ACTIVITIES: SplittableActivity[] = [
     {
-        id: "thu-day",
+        id: "wed-boat",
+        dayId: "wed-24",
+        title: "Party boat",
+        description: "2-hour morning slot on Pinecrest. Cooler + lunch on board.",
+        emoji: "⛵",
+        defaultOptionId: "boat",
+        options: [{ id: "boat", label: "Party boat", description: "Book before noon · marina (209) 965-3333" }],
+    },
+    {
+        id: "wed-beach",
+        dayId: "wed-24",
+        title: "Pinecrest Non-Boater Activities",
+        description: "Beach, kayaks, and lakeshore for anyone skipping the boat.",
+        emoji: "🏖️",
+        defaultOptionId: "beach",
+        options: [
+            {
+                id: "beach",
+                label: "Pinecrest Non-Boater Activities",
+                description: "Flat swim area · kayaks · good for little ones",
+            },
+        ],
+    },
+    {
+        id: "wed-portraits",
+        dayId: "wed-24",
+        title: "Family portraits",
+        description: "Golden hour at the house. Shower and change after the lake.",
+        emoji: "📸",
+        defaultOptionId: "portraits",
+        options: [{ id: "portraits", label: "Portraits", description: "Coordinate outfits ahead of time" }],
+    },
+    {
+        id: "thu-hatchery",
         dayId: "thu-25",
-        title: "Thursday — daytime",
-        description: "Hatchery, fishing, or pool.",
+        title: "Fish hatchery",
+        description: "Feed trout — bring quarters. Flat, paved, easy for all ages.",
+        emoji: "🐟",
         defaultOptionId: "hatchery",
-        options: [
-            { id: "hatchery", label: "Fish hatchery", description: "~40 min · feed trout · flat & easy" },
-            { id: "fishing", label: "Trout fishing", description: "Pinecrest, Lyons, or Beardsley" },
-            { id: "pool-home", label: "Pool at the house", description: "Quiet afternoon at base camp" },
-        ],
+        options: [{ id: "hatchery", label: "Fish hatchery", description: "~40 min · 7:30 AM–3:30 PM" }],
     },
     {
-        id: "thu-evening",
+        id: "thu-fishing",
         dayId: "thu-25",
-        title: "Thursday — evening",
-        description: "Outdoor movie or stay home.",
-        defaultOptionId: "movie-in",
-        options: [
-            { id: "movie-in", label: "Outdoor movie", description: "Pinecrest · ~8:30 PM · bring layers" },
-            { id: "movie-out", label: "Stay at the house", description: "Pool or early night" },
-        ],
+        title: "Trout fishing",
+        description: "Pinecrest, Lyons, or Beardsley. Ages 16+ need a license.",
+        emoji: "🎣",
+        defaultOptionId: "fishing",
+        options: [{ id: "fishing", label: "Trout fishing", description: "Lyons is quiet bank fishing" }],
     },
     {
-        id: "fri-river",
+        id: "thu-pool",
+        dayId: "thu-25",
+        title: "Pool at the house",
+        description: "Quiet afternoon at base camp while others are out.",
+        emoji: "🏊",
+        defaultOptionId: "pool-home",
+        options: [{ id: "pool-home", label: "Pool at the house", description: "Afternoon at base camp" }],
+    },
+    {
+        id: "thu-movie",
+        dayId: "thu-25",
+        title: "Outdoor movie",
+        description: "Movies Under the Stars at Pinecrest · ~8:30 PM. Bring layers.",
+        emoji: "🎬",
+        defaultOptionId: "movie-in",
+        options: [{ id: "movie-in", label: "Outdoor movie", description: "Pinecrest amphitheater · blankets & jackets" }],
+    },
+    {
+        id: "thu-evening-home",
+        dayId: "thu-25",
+        title: "Stay at the house (evening)",
+        description: "Pool time or an early night while others catch the movie.",
+        emoji: "🏠",
+        defaultOptionId: "movie-out",
+        options: [{ id: "movie-out", label: "Stay at the house", description: "Pool or early night" }],
+    },
+    {
+        id: "fri-knights-ferry",
         dayId: "fri-26",
-        title: "Friday — river day",
-        description: "Not everyone has to go. Some may stay at the pool.",
-        defaultOptionId: "river-ranch",
+        title: "Knights Ferry float",
+        description: "7 miles, 3.5–5 hours. Long drive — for the able-bodied crew.",
+        emoji: "🌊",
+        defaultOptionId: "knights-ferry",
         options: [
             {
                 id: "knights-ferry",
                 label: "Knights Ferry float",
                 description: "7 mi · 3.5–5 hrs · ~1 hr drive each way",
             },
-            {
-                id: "river-ranch",
-                label: "River Ranch",
-                description: "~20 min · mellow riverfront",
-            },
-            {
-                id: "pool-home",
-                label: "Stay at the house",
-                description: "Pool day at base camp",
-            },
         ],
     },
     {
-        id: "sat-morning",
-        dayId: "sat-27",
-        title: "Saturday — Columbia",
-        description: "Gold-rush town on the way toward Sonora (~30 min).",
-        defaultOptionId: "columbia",
-        options: [{ id: "columbia", label: "Columbia", description: "Walkable town · shops · gold panning" }],
+        id: "fri-river-ranch",
+        dayId: "fri-26",
+        title: "River Ranch",
+        description: "River swim, horseshoes, volleyball — keeps the group closer.",
+        emoji: "🏕️",
+        defaultOptionId: "river-ranch",
+        options: [{ id: "river-ranch", label: "River Ranch", description: "~20 min · mellow riverfront" }],
+    },
+    {
+        id: "fri-pool",
+        dayId: "fri-26",
+        title: "Pool at the house (Friday)",
+        description: "Pool day at base camp while others hit the river.",
+        emoji: "🏊",
+        defaultOptionId: "pool-home",
+        options: [{ id: "pool-home", label: "Stay at the house", description: "Pool day at base camp" }],
     },
 ];
+
+/** Stay-home / pool options — informational in Plan, not RSVP cards. */
+const STAY_HOME_ACTIVITY_IDS = new Set(["thu-pool", "thu-evening-home", "fri-pool"]);
+
+export function isStayHomeActivity(activity: SplittableActivity): boolean {
+    return STAY_HOME_ACTIVITY_IDS.has(activity.id);
+}
+
+/** Outings that appear on the Coordinate → Who's going tab. */
+export const RSVP_ACTIVITIES = SPLITTABLE_ACTIVITIES.filter((activity) => !isStayHomeActivity(activity));
 
 export const ACTIVITY_MENU: ActivityCard[] = [
     {
@@ -454,7 +516,7 @@ export const CHECKLIST: ChecklistDef[] = [
     {
         key: "boat",
         title: "Pinecrest party boat — Wed AM",
-        detail: "2-hour morning slot. Consider two boats for 18 people.",
+        detail: "2-hour morning slot. Consider two boats for 20 people.",
         phone: "📞 (209) 965-3333",
         priority: "now",
     },
@@ -534,6 +596,112 @@ export const MEAL_LABELS: Record<import("@/lib/types").MealType, string> = {
     lunch: "Lunch",
     dinner: "Dinner",
 };
+
+export type RoomLocation = "main-house" | "barn";
+
+export type RoomAssignee =
+    | { type: "household"; household: string }
+    | { type: "person"; name: string; household: string; note?: string };
+
+export interface TripRoom {
+    id: string;
+    name: string;
+    location: RoomLocation;
+    assignees: RoomAssignee[];
+    /** Unclaimed until a household taps to claim (synced via roomAssignments) */
+    claimableBy?: string[];
+    offLimits?: boolean;
+    offLimitsNote?: string;
+}
+
+export const ROOM_LOCATION_LABELS: Record<RoomLocation, string> = {
+    "main-house": "Main house",
+    barn: "Barn",
+};
+
+export const TRIP_ROOMS: TripRoom[] = [
+    {
+        id: "main-master",
+        name: "Main floor master",
+        location: "main-house",
+        claimableBy: ["Ben & Stephanie", "Darren & Alicia"],
+        assignees: [],
+    },
+    {
+        id: "upstairs-queen-near-bunks",
+        name: "Upstairs queen (near bunks)",
+        location: "main-house",
+        claimableBy: ["Ben & Stephanie", "Darren & Alicia"],
+        assignees: [],
+    },
+    {
+        id: "upstairs-queen",
+        name: "Upstairs queen",
+        location: "main-house",
+        assignees: [
+            { type: "person", name: "Dick", household: "Dick, Jan & Ryan" },
+            { type: "person", name: "Jan", household: "Dick, Jan & Ryan" },
+        ],
+    },
+    {
+        id: "bunk-jan-ryan",
+        name: "Bunk room",
+        location: "main-house",
+        assignees: [
+            { type: "person", name: "Jan", household: "Dick, Jan & Ryan" },
+            { type: "person", name: "Ryan", household: "Dick, Jan & Ryan", note: "Tigger bunk" },
+        ],
+    },
+    {
+        id: "bunk-kids-ik",
+        name: "Bunk room",
+        location: "main-house",
+        assignees: [
+            { type: "person", name: "Arielle", household: "Ian & Kimberly" },
+            { type: "person", name: "Asher", household: "Ian & Kimberly" },
+            { type: "person", name: "Brynn", household: "Ian & Kimberly" },
+        ],
+    },
+    {
+        id: "separate-entrance",
+        name: "Separate entrance room",
+        location: "main-house",
+        assignees: [
+            { type: "household", household: "Ian & Kimberly" },
+            { type: "person", name: "Mario", household: "Ian & Kimberly", note: "May be pet" },
+        ],
+    },
+    {
+        id: "barn-off-limits",
+        name: "10 single-bed bunk room",
+        location: "barn",
+        offLimits: true,
+        offLimitsNote: "Kids cannot enter even to play.",
+        assignees: [],
+    },
+    {
+        id: "barn-bunk-1",
+        name: "Bunk room 1",
+        location: "barn",
+        assignees: [
+            { type: "person", name: "Selah", household: "Darren & Alicia" },
+            { type: "person", name: "Maddie", household: "Ben & Stephanie" },
+            { type: "person", name: "Eliana", household: "Ian & Kimberly" },
+            { type: "person", name: "Joselyn", household: "Ian & Kimberly" },
+        ],
+    },
+    {
+        id: "barn-bunk-2",
+        name: "Bunk room 2",
+        location: "barn",
+        assignees: [
+            { type: "person", name: "Malakhi", household: "Gabe" },
+            { type: "person", name: "Isaiah", household: "Gabe" },
+            { type: "person", name: "Declan", household: "Gabe" },
+            { type: "person", name: "Gabe", household: "Gabe" },
+        ],
+    },
+];
 
 export const SUGGESTED_DINNERS: Partial<Record<DayId, string>> = {
     "tue-23": "Easy dinner at the house",

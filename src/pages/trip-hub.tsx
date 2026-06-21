@@ -1,54 +1,46 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Calendar,
     CheckCircle,
-    Compass03,
-    Diamond01,
-    LogOut01,
     MarkerPin01,
-    Stars02,
-    HomeLine,
+    Building07,
     BookOpen01,
+    User01,
+    HomeLine,
 } from "@untitledui/icons";
 import { CoordinatePanel } from "@/components/trip/coordinate-panel";
+import { GuidePanel, type GuideTabId } from "@/components/trip/guide-panel";
 import { MealsPanel } from "@/components/trip/meals-panel";
+import { StayPanel } from "@/components/trip/stay-panel";
+import { HouseholdInitials } from "@/components/trip/household-initials";
 import { MemberPicker } from "@/components/trip/member-picker";
 import { PlanPanel } from "@/components/trip/plan-panel";
-import {
-    ActivitiesReferencePanel,
-    GameNightReferencePanel,
-    GemsReferencePanel,
-} from "@/components/trip/reference-panels";
-import { SyncIndicator, TripMobileTabBar, TripSegmentedTabs } from "@/components/trip/trip-ui";
+import { SavedToast, SyncTipBanner } from "@/components/trip/sync-feedback";
+import { getTripHeroContext, TripMobileTabBar, TripSegmentedTabs } from "@/components/trip/trip-ui";
 import { TRIP_META } from "@/data/trip-content";
-import { clearAuthentication, clearStoredMember } from "@/lib/auth";
+import { clearStoredMember } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { TripProvider, useTrip } from "@/providers/trip-provider";
-import { cx } from "@/utils/cx";
 
 const TAB_KEY = "twain_harte_tab";
 const GUIDE_KEY = "twain_harte_guide_tab";
 
 const MAIN_TABS = [
     { id: "plan", label: "Plan", icon: Calendar },
+    { id: "stay", label: "Stay", icon: Building07 },
     { id: "meals", label: "Meals", icon: HomeLine },
     { id: "coordinate", label: "Coordinate", icon: CheckCircle },
     { id: "guide", label: "Guide", icon: BookOpen01 },
 ] as const;
 
-function plannerInitials(name: string) {
-    return name
-        .split(/\s*&\s*|\s+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part.charAt(0).toUpperCase())
-        .join("");
-}
-
 function TripShell() {
-    const { syncStatus, memberName } = useTrip();
+    const { memberName, savedFlash } = useTrip();
     const [tab, setTab] = useState(() => sessionStorage.getItem(TAB_KEY) ?? "plan");
-    const [guideTab, setGuideTab] = useState(() => sessionStorage.getItem(GUIDE_KEY) ?? "activities");
+    const [guideTab, setGuideTab] = useState<GuideTabId>(() => {
+        const stored = sessionStorage.getItem(GUIDE_KEY);
+        return stored === "gems" || stored === "game" ? stored : "activities";
+    });
+    const [heroContext, setHeroContext] = useState(() => getTripHeroContext());
 
     useEffect(() => {
         sessionStorage.setItem(TAB_KEY, tab);
@@ -58,14 +50,11 @@ function TripShell() {
         sessionStorage.setItem(GUIDE_KEY, guideTab);
     }, [guideTab]);
 
-    const guideTabs = useMemo(
-        () => [
-            { id: "activities", label: "Activities", icon: Compass03 },
-            { id: "gems", label: "Local gems", icon: Diamond01 },
-            { id: "game", label: "Game night", icon: Stars02 },
-        ],
-        [],
-    );
+    useEffect(() => {
+        setHeroContext(getTripHeroContext());
+        const id = window.setInterval(() => setHeroContext(getTripHeroContext()), 60_000);
+        return () => window.clearInterval(id);
+    }, []);
 
     if (!memberName) {
         return <MemberPicker />;
@@ -79,35 +68,27 @@ function TripShell() {
                         <div className="min-w-0">
                             <h1 className="trip-hero-title">Twain Harte</h1>
                             <p className="trip-hero-dates">Jun 23–27, 2026</p>
+                            {heroContext && <p className="trip-hero-context">{heroContext}</p>}
                         </div>
                         <div className="trip-hero-toolbar">
-                            <SyncIndicator status={syncStatus} compact />
                             <span className="trip-hero-chip" title={memberName}>
-                                <span className="trip-hero-chip-avatar" aria-hidden>
-                                    {plannerInitials(memberName)}
-                                </span>
+                                <HouseholdInitials
+                                    householdName={memberName}
+                                    size="sm"
+                                    className="trip-hero-chip-avatar"
+                                />
                                 <span className="trip-hero-chip-name">{memberName}</span>
                             </span>
-                            <a
-                                href={TRIP_META.mapsUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="trip-icon-btn"
-                                aria-label="Open rental address in Maps"
-                            >
-                                <MarkerPin01 />
-                            </a>
                             <button
                                 type="button"
                                 className="trip-icon-btn"
-                                aria-label="Switch planner"
+                                aria-label="Switch name"
                                 onClick={() => {
-                                    clearAuthentication();
                                     clearStoredMember();
                                     window.location.reload();
                                 }}
                             >
-                                <LogOut01 />
+                                <User01 />
                             </button>
                         </div>
                     </div>
@@ -116,43 +97,34 @@ function TripShell() {
 
             {!isSupabaseConfigured && (
                 <div className="border-b border-[var(--trip-separator)] bg-secondary px-4 py-2 text-center text-[var(--trip-caption)] text-tertiary">
-                    Offline mode
+                    Offline mode — changes stay on this device only
                 </div>
             )}
 
-            <div className={cx("trip-nav-bar", tab === "guide" && "trip-nav-bar--guide-only")}>
+            {isSupabaseConfigured && (
+                <div className="mx-auto max-w-5xl px-4 sm:px-6">
+                    <SyncTipBanner />
+                </div>
+            )}
+
+            <div className="trip-nav-bar">
                 <div className="mx-auto max-w-5xl px-4 sm:px-6">
                     <TripSegmentedTabs tabs={[...MAIN_TABS]} active={tab} onChange={setTab} />
-
-                    {tab === "guide" && (
-                        <div className="flex gap-1 overflow-x-auto py-2.5 scrollbar-hide sm:border-t sm:border-[var(--trip-separator)] sm:pb-3">
-                            {guideTabs.map(({ id, label, icon: Icon }) => (
-                                <button
-                                    key={id}
-                                    type="button"
-                                    data-active={guideTab === id}
-                                    onClick={() => setGuideTab(id)}
-                                    className="trip-guide-pill"
-                                >
-                                    <Icon />
-                                    {label}
-                                </button>
-                            ))}
-                        </div>
-                    )}
                 </div>
             </div>
 
             <main className="trip-main-pad mx-auto max-w-5xl px-4 py-5 sm:px-6 sm:py-8">
-                {tab === "plan" && <PlanPanel />}
-                {tab === "meals" && <MealsPanel />}
-                {tab === "coordinate" && <CoordinatePanel />}
-                {tab === "guide" && guideTab === "activities" && <ActivitiesReferencePanel />}
-                {tab === "guide" && guideTab === "gems" && <GemsReferencePanel />}
-                {tab === "guide" && guideTab === "game" && <GameNightReferencePanel />}
+                <div key={tab} className="trip-panel-enter">
+                    {tab === "plan" && <PlanPanel />}
+                    {tab === "stay" && <StayPanel />}
+                    {tab === "meals" && <MealsPanel />}
+                    {tab === "coordinate" && <CoordinatePanel />}
+                    {tab === "guide" && <GuidePanel active={guideTab} onChange={setGuideTab} />}
+                </div>
             </main>
 
             <TripMobileTabBar tabs={[...MAIN_TABS]} active={tab} onChange={setTab} />
+            <SavedToast visible={savedFlash} live={isSupabaseConfigured} />
 
             <footer className="hidden border-t border-[var(--trip-separator)] bg-primary py-8 text-center sm:block">
                 <p className="inline-flex items-center justify-center gap-1.5 text-[var(--trip-caption)] text-quaternary">

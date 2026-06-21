@@ -1,13 +1,21 @@
 import { ACTIVITY_MENU, GAME_NIGHT, LOCAL_GEMS } from "@/data/trip-content";
 import { PanelHeader, PhoneLine, TripBadge } from "@/components/trip/trip-ui";
 
-function ActivityCardGrid({ cards }: { cards: typeof ACTIVITY_MENU }) {
+const ACCENTS = ["", "sage", "amber"] as const;
+
+function ActivityCardGrid({ cards, accentIndex = 0 }: { cards: typeof ACTIVITY_MENU; accentIndex?: number }) {
+    const accent = ACCENTS[accentIndex % ACCENTS.length];
+
     return (
         <div className="grid gap-4 sm:grid-cols-2">
             {cards.map((card) => (
-                <article key={card.title} className="trip-card flex flex-col p-4 sm:p-5">
+                <article
+                    key={card.title}
+                    className="trip-card trip-ref-card flex flex-col p-4 sm:p-5"
+                    data-accent={accent || undefined}
+                >
                     <h4 className="text-[var(--trip-title-card)] font-semibold leading-snug tracking-tight text-primary">{card.title}</h4>
-                    <p className="mt-1.5 text-[var(--trip-caption)] font-semibold uppercase tracking-wide text-tertiary">{card.distance}</p>
+                    <p className="mt-1.5 text-[var(--trip-body-sm)] font-bold text-[var(--trip-sage)]">{card.distance}</p>
                     <p className="mt-2.5 flex-1 text-[var(--trip-body-sm)] leading-relaxed text-secondary sm:text-[var(--trip-body)]">{card.body}</p>
                     {card.lines?.map((line) =>
                         line.includes("(") && line.includes(")") ? (
@@ -29,34 +37,38 @@ function ActivityCardGrid({ cards }: { cards: typeof ACTIVITY_MENU }) {
     );
 }
 
-export function ActivitiesReferencePanel() {
+export function ActivitiesReferencePanel({ embedded }: { embedded?: boolean } = {}) {
     return (
         <div className="space-y-6">
-            <PanelHeader title="Day trips" description="Most are within 45 minutes. Knights Ferry is ~1 hour each way." />
+            {!embedded && (
+                <PanelHeader title="Day trips" description="Most are within 45 minutes. Knights Ferry is ~1 hour each way." />
+            )}
+            {embedded && <p className="trip-section-desc">Most are within 45 minutes. Knights Ferry is ~1 hour each way.</p>}
             <ActivityCardGrid cards={ACTIVITY_MENU} />
-            <p className="trip-callout">Book Pinecrest boats early — two boats if all 18 want to go together.</p>
+            <p className="trip-callout">Book Pinecrest boats early — two boats if all 20 want to go together.</p>
         </div>
     );
 }
 
-export function GemsReferencePanel() {
+export function GemsReferencePanel({ embedded }: { embedded?: boolean } = {}) {
     return (
         <div className="space-y-8">
-            <PanelHeader title="Extras" description="Evenings, backups, and side trips." />
-            {LOCAL_GEMS.map((group) => (
+            {!embedded && <PanelHeader title="Extras" description="Evenings, backups, and side trips." />}
+            {LOCAL_GEMS.map((group, index) => (
                 <section key={group.section}>
-                    <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-brand-secondary">{group.section}</h3>
-                    <ActivityCardGrid cards={group.cards} />
+                    <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[var(--trip-sage)]">{group.section}</h3>
+                    <ActivityCardGrid cards={group.cards} accentIndex={index + 1} />
                 </section>
             ))}
         </div>
     );
 }
 
-export function GameNightReferencePanel() {
+export function GameNightReferencePanel({ embedded }: { embedded?: boolean } = {}) {
     return (
         <div className="space-y-6">
-            <PanelHeader title="Game Night" description={GAME_NIGHT.intro} />
+            {!embedded && <PanelHeader title="Game Night" description={GAME_NIGHT.intro} />}
+            {embedded && <p className="trip-section-desc">{GAME_NIGHT.intro}</p>}
 
             <article className="trip-card p-4 sm:p-5">
                 <h3 className="font-semibold text-primary">Format</h3>
@@ -70,7 +82,7 @@ export function GameNightReferencePanel() {
                         <div key={s.name} className="border-l-[3px] border-brand-solid pl-4">
                             <p className="font-semibold text-primary">
                                 {s.name}{" "}
-                                <span className="text-sm font-bold text-[#b5495b]">{s.points}</span>
+                                <span className="text-sm font-bold text-[var(--trip-warning)]">{s.points}</span>
                             </p>
                             <p className="mt-0.5 text-sm leading-relaxed text-secondary">{s.detail}</p>
                         </div>
