@@ -1,56 +1,82 @@
 import { TextArea } from "@/components/base/textarea/textarea";
-import { DAYS } from "@/data/trip-content";
-import { DayTag, EffortBox } from "@/components/trip/trip-ui";
+import { DAYS, TRIP_META } from "@/data/trip-content";
+import { DayHeader, EffortBox, getTripDayHighlight, PanelHeader } from "@/components/trip/trip-ui";
 import { useTrip } from "@/providers/trip-provider";
+import { cx } from "@/utils/cx";
 
 export function PlanPanel() {
     const { state, updateDayNotes } = useTrip();
 
     return (
-        <div className="space-y-4">
-            <div>
-                <h2 className="text-lg font-semibold text-primary">The week at a glance</h2>
-                <p className="mt-1 text-sm text-tertiary">
-                    One marquee outing a day, pool time built in, and factual effort notes so everyone picks their own level. Day notes below
-                    sync for all planners.
-                </p>
+        <div className="space-y-6">
+            <PanelHeader title="This week" description="One main outing per day. Add notes everyone can see." />
+
+            <p className="trip-callout">
+                Check-in Tue 4 PM ·{" "}
+                <a href={TRIP_META.mapsUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-[var(--trip-accent)]">
+                    {TRIP_META.address}
+                </a>
+            </p>
+
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                {DAYS.map((day) => (
+                    <a
+                        key={day.id}
+                        href={`#day-${day.id}`}
+                        className="inline-flex shrink-0 flex-col items-center rounded-2xl border border-[var(--trip-separator)] bg-primary px-4 py-2.5 text-center shadow-xs transition-colors active:bg-secondary"
+                    >
+                        <span className="text-[var(--trip-caption)] font-bold uppercase text-tertiary">{day.weekday}</span>
+                        <span className="text-[1.375rem] font-bold leading-none tracking-tight text-primary">{day.dayNum}</span>
+                    </a>
+                ))}
             </div>
 
-            {DAYS.map((day) => (
-                <article key={day.id} className="overflow-hidden rounded-2xl border border-secondary bg-primary shadow-xs ring-1 ring-secondary ring-inset">
-                    <header className="flex items-center gap-3 border-b border-secondary bg-secondary px-4 py-3">
-                        <div className="flex size-14 shrink-0 flex-col items-center justify-center rounded-xl bg-brand-solid text-xs font-bold text-white">
-                            <span>{day.weekday}</span>
-                            <span className="text-lg leading-none">{day.dayNum}</span>
+            {DAYS.map((day) => {
+                const highlight = getTripDayHighlight(day.id);
+
+                return (
+                    <article
+                        key={day.id}
+                        id={`day-${day.id}`}
+                        className={cx(
+                            "trip-card scroll-mt-28 overflow-hidden",
+                            (highlight === "today" || highlight === "upcoming") && "ring-2 ring-[var(--trip-accent)]/40",
+                        )}
+                    >
+                        <header className="border-b border-[var(--trip-separator)] bg-secondary px-4 py-4 sm:px-5">
+                            <DayHeader
+                                weekday={day.weekday}
+                                dayNum={day.dayNum}
+                                title={day.title}
+                                theme={day.theme}
+                                tag={day.tag}
+                                tagTone={day.tagTone}
+                                highlight={highlight || undefined}
+                            />
+                        </header>
+                        <div className="space-y-3 px-4 py-4">
+                            {day.rows.map((row) => (
+                                <div key={row.title} className="flex gap-3.5 text-[var(--trip-body-sm)] leading-relaxed sm:text-[var(--trip-body)]">
+                                    <span className="mt-0.5 text-[1.375rem] leading-none" aria-hidden>
+                                        {row.icon}
+                                    </span>
+                                    <p>
+                                        <span className="font-semibold text-primary">{row.title}</span> {row.body}
+                                    </p>
+                                </div>
+                            ))}
+                            <EffortBox>{day.effortAccess}</EffortBox>
+                            <TextArea
+                                label="Notes"
+                                value={state.dayNotes[day.id] ?? ""}
+                                onChange={(v) => updateDayNotes(day.id, v)}
+                                rows={2}
+                                placeholder="Optional"
+                            />
                         </div>
-                        <div>
-                            <h3 className="text-md font-semibold text-primary">
-                                {day.title}
-                                <DayTag label={day.tag} tone={day.tagTone} />
-                            </h3>
-                            <p className="text-sm font-medium text-brand-secondary">{day.theme}</p>
-                        </div>
-                    </header>
-                    <div className="space-y-3 px-4 py-4">
-                        {day.rows.map((row) => (
-                            <div key={row.title} className="flex gap-3 text-sm">
-                                <span className="text-lg leading-snug">{row.icon}</span>
-                                <p>
-                                    <b className="text-primary">{row.title}</b> {row.body}
-                                </p>
-                            </div>
-                        ))}
-                        <EffortBox>{day.effortAccess}</EffortBox>
-                        <TextArea
-                            label="Shared notes for this day"
-                            hint="Timing tweaks, who's driving, outfit reminders — visible to all planners."
-                            value={state.dayNotes[day.id] ?? ""}
-                            onChange={(v) => updateDayNotes(day.id, v)}
-                            rows={2}
-                        />
-                    </div>
-                </article>
-            ))}
+                    </article>
+                );
+            })}
         </div>
     );
 }

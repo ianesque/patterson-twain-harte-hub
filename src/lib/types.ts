@@ -19,6 +19,8 @@ export interface ChecklistItem {
 export interface TripCollaborationState {
     meals: Partial<Record<DayId, Partial<Record<MealType, MealSlot>>>>;
     activityChoices: Partial<Record<DayId, { optionId: string; notes?: string }>>;
+    /** rsvpKey → household → option id from SPLITTABLE_ACTIVITIES */
+    activitySignups: Record<string, Record<string, string>>;
     rsvps: Record<string, Record<string, RsvpStatus>>;
     checklist: Record<string, ChecklistItem>;
     dayNotes: Partial<Record<DayId, string>>;
@@ -34,18 +36,18 @@ export interface TripStateRow {
 export const TRIP_STATE_ID = "twain-harte-2026";
 
 export const DEFAULT_PLANNER_SUGGESTIONS = [
-    "Ian & household",
-    "Sibling household A",
-    "Sibling household B",
-    "Sibling household C",
-    "Sibling household D",
-    "Sibling household E",
+    "Ian & Kimberly",
+    "Ben & Stephanie",
+    "Darren & Alicia",
+    "Gabe",
+    "Dick, Jan & Ryan",
 ];
 
 export function emptyCollaborationState(): TripCollaborationState {
     return {
         meals: {},
         activityChoices: {},
+        activitySignups: {},
         rsvps: {},
         checklist: {},
         dayNotes: {},

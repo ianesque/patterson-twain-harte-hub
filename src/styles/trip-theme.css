@@ -1,20 +1,680 @@
-/* Patterson reunion palette on Untitled UI brand tokens */
+/* Apple-inspired trip hub theme — system light/dark, white/off-white surfaces */
+
 :root {
-    --color-brand-25: #f4f7f3;
-    --color-brand-50: #eef4ef;
-    --color-brand-100: #d9e2dd;
-    --color-brand-200: #b8d4cb;
-    --color-brand-300: #7fb8a8;
-    --color-brand-400: #2a9d8f;
-    --color-brand-500: #1f5e4f;
-    --color-brand-600: #163f36;
-    --color-brand-700: #123329;
-    --color-brand-800: #0e2821;
-    --color-brand-900: #0a1e19;
-    --color-brand-950: #061410;
+    color-scheme: light dark;
+
+    --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+    --color-brand-25: #f5f9ff;
+    --color-brand-50: #eff6ff;
+    --color-brand-100: #dbeafe;
+    --color-brand-200: #bfdbfe;
+    --color-brand-300: #93c5fd;
+    --color-brand-400: #3b82f6;
+    --color-brand-500: #0071e3;
+    --color-brand-600: #0060c0;
+    --color-brand-700: #004d99;
+    --color-brand-800: #003d7a;
+    --color-brand-900: #002952;
+    --color-brand-950: #001a33;
+
+    --trip-bg: #f2f2f7;
+    --trip-bg-elevated: #ffffff;
+    --trip-bg-secondary: #ffffff;
+    --trip-separator: rgba(60, 60, 67, 0.12);
+    --trip-label: rgba(60, 60, 67, 0.6);
+    --trip-text: #1d1d1f;
+    --trip-text-secondary: #3a3a3c;
+    --trip-accent: #0071e3;
+    --trip-accent-soft: rgba(0, 113, 227, 0.12);
+    --trip-sage: #5a8a7a;
+    --trip-sage-soft: rgba(90, 138, 122, 0.14);
+
+    --trip-title-hero: clamp(2rem, 7vw, 2.125rem);
+    --trip-title-section: clamp(1.375rem, 4.5vw, 1.5rem);
+    --trip-title-card: clamp(1.125rem, 3.5vw, 1.25rem);
+    --trip-body: 1.0625rem;
+    --trip-body-sm: 0.9375rem;
+    --trip-caption: 0.8125rem;
+    --trip-tab: 0.8125rem;
+
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top: env(safe-area-inset-top, 0px);
+    --trip-tab-bar-size: 4.25rem;
+    --trip-tab-bar-offset: calc(var(--trip-tab-bar-size) + var(--safe-bottom));
 }
 
 .dark-mode {
-    --color-brand-400: #3eb3a4;
-    --color-brand-500: #2a9d8f;
+    --color-brand-400: #409cff;
+    --color-brand-500: #0a84ff;
+    --color-brand-600: #0077ed;
+
+    --trip-bg: #000000;
+    --trip-bg-elevated: #1c1c1e;
+    --trip-bg-secondary: #2c2c2e;
+    --trip-separator: rgba(84, 84, 88, 0.65);
+    --trip-label: rgba(235, 235, 245, 0.6);
+    --trip-text: #f5f5f7;
+    --trip-text-secondary: #ebebf5;
+    --trip-accent: #0a84ff;
+    --trip-accent-soft: rgba(10, 132, 255, 0.18);
+    --trip-sage: #7eb8a4;
+    --trip-sage-soft: rgba(126, 184, 164, 0.16);
+}
+
+:root {
+    --color-bg-primary: var(--trip-bg-elevated);
+    --color-bg-secondary: var(--trip-bg);
+    --color-bg-secondary_alt: var(--trip-bg);
+    --color-bg-primary_alt: var(--trip-bg-secondary);
+    --color-bg-brand-primary_alt: var(--trip-accent-soft);
+    --color-border-secondary: var(--trip-separator);
+    --color-text-primary: var(--trip-text);
+    --color-text-secondary: var(--trip-text-secondary);
+    --color-text-tertiary: var(--trip-label);
+    --color-text-quaternary: var(--trip-label);
+    --color-text-brand-secondary: var(--trip-accent);
+    --color-fg-brand-primary: var(--trip-accent);
+    --color-fg-brand-primary_alt: var(--trip-accent);
+}
+
+.dark-mode {
+    --color-bg-primary: var(--trip-bg-elevated);
+    --color-bg-secondary: var(--trip-bg);
+    --color-bg-secondary_alt: var(--trip-bg-secondary);
+    --color-bg-primary_alt: var(--trip-bg-secondary);
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    height: 100%;
+}
+
+html,
+body,
+#root {
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+}
+
+body {
+    font-family: var(--font-body);
+    font-size: var(--trip-body);
+    line-height: 1.47;
+    letter-spacing: -0.01em;
+}
+
+.trip-surface {
+    background-color: var(--trip-bg);
+    color: var(--trip-text);
+}
+
+.trip-hero {
+    background: var(--trip-bg-elevated);
+    padding-top: var(--safe-top);
+}
+
+.trip-hero-compact {
+    padding-bottom: 0.25rem;
+}
+
+.trip-hero-title {
+    font-family: var(--font-display);
+    font-size: var(--trip-title-hero);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--trip-text);
+}
+
+.trip-hero-compact .trip-hero-title {
+    font-size: clamp(1.75rem, 6vw, 2.125rem);
+}
+
+.trip-hero-dates {
+    margin-top: 0.125rem;
+    font-size: var(--trip-body-sm);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--trip-label);
+}
+
+.trip-hero-label {
+    font-size: var(--trip-caption);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--trip-label);
+}
+
+.trip-hero-meta {
+    font-size: var(--trip-body-sm);
+    color: var(--trip-label);
+    line-height: 1.45;
+}
+
+.trip-hero-link {
+    color: var(--trip-accent);
+    font-size: var(--trip-body-sm);
+    font-weight: 500;
+}
+
+.trip-hero-toolbar {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.trip-hero-chip {
+    display: inline-flex;
+    max-width: 7.5rem;
+    align-items: center;
+    gap: 0.375rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--trip-bg);
+    padding: 0.375rem 0.75rem 0.375rem 0.375rem;
+    font-size: var(--trip-caption);
+    font-weight: 600;
+    color: var(--trip-text);
+}
+
+.trip-hero-chip-avatar {
+    display: flex;
+    width: 1.75rem;
+    height: 1.75rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--trip-accent-soft);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--trip-accent);
+}
+
+.trip-hero-chip-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 380px) {
+    .trip-hero-chip-name {
+        display: none;
+    }
+
+    .trip-hero-chip {
+        max-width: none;
+        padding-right: 0.375rem;
+    }
+}
+
+.trip-icon-btn {
+    display: inline-flex;
+    width: 2.75rem;
+    height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    color: var(--trip-label);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.trip-icon-btn:active {
+    background: var(--trip-bg);
+    color: var(--trip-text);
+}
+
+.trip-icon-btn svg {
+    width: 1.375rem;
+    height: 1.375rem;
+}
+
+.trip-card {
+    border-radius: 1rem;
+    border: 0.5px solid var(--trip-separator);
+    background: var(--trip-bg-elevated);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.dark-mode .trip-card {
+    box-shadow: none;
+}
+
+.trip-section-title {
+    font-family: var(--font-display);
+    font-size: var(--trip-title-section);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    color: var(--trip-text);
+}
+
+.trip-section-desc {
+    margin-top: 0.375rem;
+    font-size: var(--trip-body-sm);
+    line-height: 1.5;
+    color: var(--trip-label);
+}
+
+.trip-nav-bar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    border-bottom: 0.5px solid var(--trip-separator);
+    background: color-mix(in srgb, var(--trip-bg-elevated) 86%, transparent);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+.trip-segmented {
+    display: none;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.375rem;
+    padding: 0.5rem 0 0.625rem;
+}
+
+@media (min-width: 640px) {
+    .trip-segmented {
+        display: grid;
+    }
+}
+
+.trip-segment {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    min-height: 4rem;
+    border-radius: 0.875rem;
+    padding: 0.5rem 0.25rem;
+    font-size: var(--trip-tab);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--trip-label);
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.trip-segment[data-active="true"] {
+    background: var(--trip-accent-soft);
+    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--trip-accent) 35%, transparent);
+    color: var(--trip-accent);
+}
+
+.trip-segment svg {
+    width: 1.875rem;
+    height: 1.875rem;
+    flex-shrink: 0;
+}
+
+.trip-segment-label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+    .trip-segmented {
+        gap: 0.5rem;
+        padding: 0.625rem 0 0.75rem;
+    }
+
+    .trip-segment {
+        flex-direction: row;
+        gap: 0.5rem;
+        min-height: 3.5rem;
+        padding: 0.75rem 1rem;
+        font-size: 1.0625rem;
+    }
+
+    .trip-segment svg {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+}
+
+.trip-tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-top: 0.5px solid var(--trip-separator);
+    background: color-mix(in srgb, var(--trip-bg-elevated) 92%, transparent);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    padding-top: 0.375rem;
+    padding-bottom: max(0.375rem, constant(safe-area-inset-bottom));
+    padding-bottom: max(0.375rem, env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 640px) {
+    .trip-tab-bar {
+        display: none;
+    }
+}
+
+.trip-tab-bar-item {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-height: var(--trip-tab-bar-size);
+    padding: 0.25rem 0.125rem;
+    font-size: var(--trip-tab);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--trip-label);
+    transition: color 0.15s ease, background 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.trip-tab-bar-item[data-active="true"] {
+    color: var(--trip-accent);
+}
+
+.trip-tab-bar-item svg {
+    width: 1.875rem;
+    height: 1.875rem;
+    flex-shrink: 0;
+}
+
+.trip-tab-bar-label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.trip-nav-bar--guide-only {
+    border-bottom: 0.5px solid var(--trip-separator);
+}
+
+@media (max-width: 639px) {
+    .trip-nav-bar:not(.trip-nav-bar--guide-only) {
+        display: none;
+    }
+
+    .trip-nav-bar--guide-only {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        background: color-mix(in srgb, var(--trip-bg-elevated) 86%, transparent);
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+    }
+}
+
+.trip-main-pad {
+    padding-bottom: calc(var(--trip-tab-bar-offset) + 1rem);
+}
+
+@media (min-width: 640px) {
+    .trip-main-pad {
+        padding-bottom: 2rem;
+    }
+}
+
+.trip-guide-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.5rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 999px;
+    font-size: var(--trip-body-sm);
+    font-weight: 600;
+    color: var(--trip-label);
+    background: transparent;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.trip-guide-pill[data-active="true"] {
+    background: var(--trip-accent-soft);
+    color: var(--trip-accent);
+}
+
+.trip-guide-pill svg {
+    width: 1.125rem;
+    height: 1.125rem;
+}
+
+.trip-planner-card {
+    min-height: 3.75rem;
+    border-radius: 1rem;
+    border: 0.5px solid var(--trip-separator);
+    background: var(--trip-bg-elevated);
+    transition: transform 0.12s ease;
+}
+
+.trip-planner-card:active {
+    transform: scale(0.98);
+}
+
+.trip-callout {
+    border-radius: 0.875rem;
+    border: 0.5px solid var(--trip-separator);
+    background: var(--trip-bg-secondary);
+    padding: 1rem 1.125rem;
+    font-size: var(--trip-body-sm);
+    line-height: 1.5;
+    color: var(--trip-text-secondary);
+}
+
+.trip-effort {
+    border-radius: 0.875rem;
+    border: 0.5px solid var(--trip-separator);
+    background: var(--trip-sage-soft);
+    padding: 0.875rem 1rem;
+    font-size: var(--trip-body-sm);
+    line-height: 1.5;
+    color: var(--trip-text-secondary);
+}
+
+.trip-effort b {
+    color: var(--trip-sage);
+    font-weight: 600;
+}
+
+.trip-option-grid {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.trip-option-card {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.125rem;
+    border-radius: 0.875rem;
+    border: 1.5px solid var(--trip-separator);
+    background: var(--trip-bg-secondary);
+    padding: 0.875rem 1rem;
+    text-align: left;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.trip-option-card[data-selected="true"] {
+    border-color: var(--trip-accent);
+    background: var(--trip-accent-soft);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--trip-accent) 25%, transparent);
+}
+
+.trip-option-card-title {
+    font-size: var(--trip-body-sm);
+    font-weight: 600;
+    color: var(--trip-text);
+}
+
+.trip-option-card[data-selected="true"] .trip-option-card-title {
+    color: var(--trip-accent);
+}
+
+.trip-option-card-desc {
+    font-size: var(--trip-caption);
+    line-height: 1.4;
+    color: var(--trip-label);
+}
+
+.trip-signup-summary {
+    margin-top: 1rem;
+    border-top: 0.5px solid var(--trip-separator);
+    padding-top: 0.875rem;
+}
+
+.trip-signup-summary-title {
+    font-size: var(--trip-caption);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--trip-label);
+}
+
+.trip-signup-row {
+    margin-top: 0.5rem;
+    font-size: var(--trip-body-sm);
+    line-height: 1.45;
+}
+
+.trip-signup-row-label {
+    font-weight: 600;
+    color: var(--trip-text);
+}
+
+.trip-signup-row-names {
+    color: var(--trip-text-secondary);
+}
+
+.trip-checklist-section-title {
+    margin-bottom: 0.5rem;
+    font-size: var(--trip-caption);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--trip-label);
+}
+
+.trip-checklist-section-title--urgent {
+    color: var(--trip-accent);
+}
+
+.trip-checklist-row {
+    display: flex;
+    gap: 0.75rem;
+    border-radius: 1rem;
+    border: 0.5px solid var(--trip-separator);
+    background: var(--trip-bg-elevated);
+    padding: 0.875rem 1rem;
+    transition: opacity 0.15s ease;
+}
+
+.trip-checklist-row[data-done="true"] {
+    opacity: 0.65;
+}
+
+.trip-checklist-row[data-urgent="true"] {
+    border-color: color-mix(in srgb, var(--trip-accent) 35%, var(--trip-separator));
+}
+
+.trip-checklist-row-title {
+    font-size: var(--trip-body-sm);
+    font-weight: 600;
+    color: var(--trip-text);
+}
+
+.trip-checklist-row[data-done="true"] .trip-checklist-row-title {
+    text-decoration: line-through;
+    color: var(--trip-label);
+}
+
+.trip-checklist-row-detail {
+    margin-top: 0.25rem;
+    font-size: var(--trip-caption);
+    line-height: 1.45;
+    color: var(--trip-label);
+}
+
+.trip-checklist-row-meta {
+    margin-top: 0.375rem;
+    font-size: var(--trip-caption);
+    color: var(--trip-label);
+}
+
+.trip-option-card[data-default-preview="true"] {
+    border-style: dashed;
+}
+
+.trip-option-card-hint {
+    margin-top: 0.25rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--trip-accent);
+}
+
+.trip-coordinate-tab {
+    display: inline-flex;
+    min-height: 2.75rem;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    border-radius: 0.625rem;
+    padding: 0.5rem 0.75rem;
+    font-size: var(--trip-body-sm);
+    font-weight: 600;
+    color: var(--trip-label);
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+}
+
+.trip-coordinate-tab[data-active="true"] {
+    background: var(--trip-bg-elevated);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    color: var(--trip-text);
+}
+
+.trip-coordinate-tab-badge {
+    display: inline-flex;
+    min-width: 1.125rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--trip-accent);
+    padding: 0 0.375rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1.25rem;
+    color: #fff;
+}
+
+.trip-you-badge {
+    display: inline-flex;
+    margin-left: 0.375rem;
+    border-radius: 999px;
+    background: var(--trip-accent-soft);
+    padding: 0.0625rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--trip-accent);
+    vertical-align: middle;
+}
+
+.trip-you-badge--muted {
+    background: var(--trip-bg);
+    color: var(--trip-label);
 }

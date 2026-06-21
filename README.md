@@ -54,9 +54,25 @@ Uses `HashRouter` (`/#/`) so routing works on static hosting.
 ### One-command helpers
 
 ```bash
-# Supabase (manual steps if no token; auto-provision with SUPABASE_ACCESS_TOKEN)
-./scripts/setup-supabase.sh
+# List organizations (debug token / pick org id)
+export SUPABASE_ACCESS_TOKEN=sbp_...
+./scripts/setup-supabase.sh --list-orgs
 
+# Auto-provision (uses sole org, or set one explicitly)
+export SUPABASE_ORG_ID=your-org-uuid   # if you have multiple orgs
+# export SUPABASE_ORG_NAME="My Org"    # alternative to ORG_ID
+./scripts/setup-supabase.sh
+```
+
+**Cloudflare 1010 / API blocked?** Skip the Management API and use the dashboard:
+
+```bash
+./scripts/setup-supabase.sh --manual
+```
+
+Create the project at [supabase.com/dashboard/new](https://supabase.com/dashboard/new), run `supabase/schema.sql` in the SQL editor, then paste URL + anon key when prompted.
+
+```bash
 # GitHub (needs gh CLI or GITHUB_TOKEN)
 ./scripts/push-github.sh patterson-twain-harte-hub
 ```

@@ -1,143 +1,312 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/components/base/buttons/button";
 import { Checkbox } from "@/components/base/checkbox/checkbox";
-import { CHECKLIST, SPLITTABLE_ACTIVITIES } from "@/data/trip-content";
-import { rsvpKey } from "@/lib/types";
+import { CHECKLIST, dayShortLabel, SPLITTABLE_ACTIVITIES } from "@/data/trip-content";
+import { DEFAULT_PLANNER_SUGGESTIONS, rsvpKey } from "@/lib/types";
 import { useTrip } from "@/providers/trip-provider";
-import type { RsvpStatus } from "@/lib/types";
+import type { ChecklistDef, SplittableActivity } from "@/data/trip-content";
+import { ChecklistProgress, PanelHeader, PhoneLine } from "@/components/trip/trip-ui";
 import { cx } from "@/utils/cx";
 
-const RSVP_OPTIONS: { value: RsvpStatus; label: string; color: "primary" | "secondary" | "tertiary" }[] = [
-    { value: "in", label: "In", color: "primary" },
-    { value: "maybe", label: "Maybe", color: "secondary" },
-    { value: "out", label: "Out", color: "tertiary" },
+const COORDINATE_TAB_KEY = "twain_harte_coordinate_tab";
+
+const CHECKLIST_GROUPS: { id: ChecklistDef["priority"]; label: string; urgent?: boolean }[] = [
+    { id: "now", label: "Do first", urgent: true },
+    { id: "soon", label: "Before the trip", urgent: false },
+    { id: "flex", label: "When you can", urgent: false },
 ];
 
-const priorityClass = {
-    now: "bg-utility-error-50 text-utility-error-700",
-    soon: "bg-utility-warning-50 text-utility-warning-700",
-    flex: "bg-secondary text-secondary",
-};
+const COORDINATE_SUBTABS = [
+    { id: "actions", label: "Actions needed" },
+    { id: "plans", label: "Your plans" },
+] as const;
+
+type CoordinateSubTab = (typeof COORDINATE_SUBTABS)[number]["id"];
+
+function readCoordinateSubTab(): CoordinateSubTab {
+    const stored = sessionStorage.getItem(COORDINATE_TAB_KEY);
+    return stored === "plans" ? "plans" : "actions";
+}
+
+function resolvePick(signups: Record<string, string>, memberName: string, defaultOptionId: string) {
+    return signups[memberName] ?? defaultOptionId;
+}
+
+function SignupSummary({
+    activity,
+    signups,
+}: {
+    activity: SplittableActivity;
+    signups: Record<string, string>;
+}) {
+    const { options, defaultOptionId } = activity;
+
+    const namesForOption = (optionId: string) => {
+        const explicit = Object.entries(signups)
+            .filter(([, id]) => id === optionId)
+            .map(([name]) => name);
+        const onDefault = DEFAULT_PLANNER_SUGGESTIONS.filter(
+            (name) => !signups[name] && defaultOptionId === optionId,
+        );
+        return [...explicit, ...onDefault];
+    };
+
+    const hasAny = options.some((opt) => namesForOption(opt.id).length > 0);
+
+    if (!hasAny) {
+        return (
+            <p className="trip-signup-summary mt-4 text-[var(--trip-caption)] text-tertiary">
+                No households yet — defaults show until someone taps a choice.
+            </p>
+        );
+    }
+
+    return (
+        <div className="trip-signup-summary">
+            <p className="trip-signup-summary-title">Household picks</p>
+            {options.map((option) => {
+                const names = namesForOption(option.id);
+                if (names.length === 0) return null;
+                const defaultOnly = names.every((name) => !signups[name]);
+                return (
+                    <p key={option.id} className="trip-signup-row">
+                        <span className="trip-signup-row-label">
+                            {option.label} · {names.length}
+                        </span>
+                        <span className="trip-signup-row-names">
+                            {" "}
+                            — {names.join(", ")}
+                            {defaultOnly && names.length > 0 && (
+                                <span className="text-tertiary"> (default until confirmed)</span>
+                            )}
+                        </span>
+                    </p>
+                );
+            })}
+        </div>
+    );
+}
+
+function ActivitySignupCard({
+    activity,
+    memberName,
+    signups,
+    onPick,
+}: {
+    activity: SplittableActivity;
+    memberName: string;
+    signups: Record<string, string>;
+    onPick: (optionId: string) => void;
+}) {
+    const savedPick = signups[memberName];
+    const displayPick = resolvePick(signups, memberName, activity.defaultOptionId);
+    const dayLabel = dayShortLabel(activity.dayId);
+    const singleOption = activity.options.length === 1;
+
+    return (
+        <article className="trip-card p-4 sm:p-5">
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <span className="rounded-md bg-secondary px-2 py-0.5 text-[var(--trip-caption)] font-bold text-[var(--trip-accent)]">
+                    {dayLabel}
+                </span>
+                <h4 className="text-[var(--trip-title-card)] font-semibold tracking-tight text-primary">{activity.title}</h4>
+            </div>
+            {activity.description && <p className="mt-1.5 text-[var(--trip-body-sm)] text-tertiary">{activity.description}</p>}
+
+            <div className="trip-callout mt-4 py-3">
+                {singleOption ? (
+                    <p>
+                        <span className="font-semibold text-primary">Tap below to confirm</span> your household is going to
+                        Columbia.
+                    </p>
+                ) : (
+                    <p>
+                        <span className="font-semibold text-primary">Tap one option</span> for your household. A default is
+                        highlighted — tap it to confirm or choose another.
+                    </p>
+                )}
+            </div>
+
+            <p className="mt-3 text-[var(--trip-caption)] font-semibold text-primary">
+                {memberName}
+                {savedPick ? (
+                    <span className="trip-you-badge">Confirmed</span>
+                ) : (
+                    <span className="trip-you-badge trip-you-badge--muted">Default shown</span>
+                )}
+            </p>
+
+            <div className="trip-option-grid mt-2" role="radiogroup" aria-label={`${activity.title} plan for ${memberName}`}>
+                {activity.options.map((option) => {
+                    const selected = displayPick === option.id;
+                    const isDefaultPreview = !savedPick && option.id === activity.defaultOptionId;
+                    return (
+                        <button
+                            key={option.id}
+                            type="button"
+                            role="radio"
+                            aria-checked={selected}
+                            data-selected={selected}
+                            data-default-preview={isDefaultPreview && !savedPick}
+                            className="trip-option-card"
+                            onClick={() => onPick(option.id)}
+                        >
+                            <span className="trip-option-card-title">{option.label}</span>
+                            {option.description && <span className="trip-option-card-desc">{option.description}</span>}
+                            {isDefaultPreview && !savedPick && (
+                                <span className="trip-option-card-hint">Suggested · tap to confirm</span>
+                            )}
+                        </button>
+                    );
+                })}
+            </div>
+
+            <SignupSummary activity={activity} signups={signups} />
+        </article>
+    );
+}
+
+function ChecklistRow({
+    item,
+    checked,
+    doneBy,
+    onToggle,
+}: {
+    item: ChecklistDef;
+    checked: boolean;
+    doneBy?: string;
+    onToggle: () => void;
+}) {
+    return (
+        <li
+            data-done={checked}
+            data-urgent={item.priority === "now" && !checked}
+            className="trip-checklist-row"
+        >
+            <Checkbox isSelected={checked} onChange={onToggle} aria-label={item.title} />
+            <div className="min-w-0 flex-1">
+                <p className="trip-checklist-row-title">{item.title}</p>
+                <p className="trip-checklist-row-detail">{item.detail}</p>
+                {item.phone && <PhoneLine line={item.phone} />}
+                {doneBy && checked && <p className="trip-checklist-row-meta">Done by {doneBy}</p>}
+            </div>
+        </li>
+    );
+}
 
 export function CoordinatePanel() {
-    const { state, memberName, setRsvp, toggleChecklist, resetChecklist } = useTrip();
+    const { state, memberName, setActivitySignup, toggleChecklist, resetChecklist } = useTrip();
+    const [subTab, setSubTab] = useState<CoordinateSubTab>(readCoordinateSubTab);
+
+    useEffect(() => {
+        sessionStorage.setItem(COORDINATE_TAB_KEY, subTab);
+    }, [subTab]);
 
     if (!memberName) return null;
 
-    return (
-        <div className="space-y-8">
-            <section>
-                <h2 className="text-lg font-semibold text-primary">Activity sign-ups</h2>
-                <p className="mt-1 text-sm text-tertiary">
-                    Mark yourself in, maybe, or out on splittable outings. Everyone sees the headcount — no need to poll the group chat.
-                </p>
+    const doneCount = CHECKLIST.filter((item) => state.checklist[item.key]?.done).length;
+    const urgentRemaining = CHECKLIST.filter((item) => item.priority === "now" && !state.checklist[item.key]?.done).length;
 
-                <div className="mt-4 space-y-4">
+    return (
+        <div className="space-y-5">
+            <PanelHeader title="Coordinate" description="Book what needs reserving, then confirm plans for split outings." />
+
+            <div
+                className="flex gap-1 overflow-x-auto rounded-xl bg-secondary p-1 ring-1 ring-[var(--trip-separator)] ring-inset scrollbar-hide"
+                role="tablist"
+                aria-label="Coordinate sections"
+            >
+                {COORDINATE_SUBTABS.map(({ id, label }) => (
+                    <button
+                        key={id}
+                        type="button"
+                        role="tab"
+                        data-active={subTab === id}
+                        aria-selected={subTab === id}
+                        className="trip-coordinate-tab"
+                        onClick={() => setSubTab(id)}
+                    >
+                        {label}
+                        {id === "actions" && urgentRemaining > 0 && (
+                            <span className="trip-coordinate-tab-badge">{urgentRemaining}</span>
+                        )}
+                    </button>
+                ))}
+            </div>
+
+            {subTab === "actions" && (
+                <section className="space-y-4">
+                    <div className="flex flex-wrap items-end justify-between gap-3">
+                        <p className="trip-section-desc">
+                            {urgentRemaining > 0
+                                ? `${urgentRemaining} urgent ${urgentRemaining === 1 ? "item" : "items"} left`
+                                : "Shared booking to-dos for planners"}
+                        </p>
+                        <Button
+                            color="link-gray"
+                            size="sm"
+                            onClick={() => {
+                                if (window.confirm("Clear all checklist checkmarks for everyone?")) resetChecklist();
+                            }}
+                        >
+                            Clear checks
+                        </Button>
+                    </div>
+
+                    <ChecklistProgress done={doneCount} total={CHECKLIST.length} label="Reservations" />
+
+                    {CHECKLIST_GROUPS.map((group) => {
+                        const items = CHECKLIST.filter((item) => item.priority === group.id);
+                        if (items.length === 0) return null;
+
+                        return (
+                            <div key={group.id}>
+                                <h4
+                                    className={cx(
+                                        "trip-checklist-section-title",
+                                        group.urgent && "trip-checklist-section-title--urgent",
+                                    )}
+                                >
+                                    {group.label}
+                                </h4>
+                                <ul className="space-y-2">
+                                    {items.map((item) => {
+                                        const meta = state.checklist[item.key];
+                                        return (
+                                            <ChecklistRow
+                                                key={item.key}
+                                                item={item}
+                                                checked={meta?.done ?? false}
+                                                doneBy={meta?.doneBy}
+                                                onToggle={() => toggleChecklist(item.key)}
+                                            />
+                                        );
+                                    })}
+                                </ul>
+                            </div>
+                        );
+                    })}
+                </section>
+            )}
+
+            {subTab === "plans" && (
+                <section className="space-y-4">
                     {SPLITTABLE_ACTIVITIES.map((activity) => {
                         const key = rsvpKey(activity.dayId, activity.id);
-                        const votes = state.rsvps[key] ?? {};
-                        const myVote = votes[memberName];
-
-                        const counts = { in: 0, maybe: 0, out: 0 };
-                        Object.values(votes).forEach((v) => {
-                            counts[v]++;
-                        });
+                        const signups = state.activitySignups[key] ?? {};
 
                         return (
-                            <article
+                            <ActivitySignupCard
                                 key={activity.id}
-                                className="rounded-2xl border border-secondary bg-primary p-4 shadow-xs ring-1 ring-secondary ring-inset"
-                            >
-                                <h3 className="font-semibold text-primary">{activity.title}</h3>
-                                <p className="mt-1 text-sm text-tertiary">{activity.description}</p>
-
-                                <div className="mt-3 flex flex-wrap gap-2">
-                                    {RSVP_OPTIONS.map((opt) => (
-                                        <Button
-                                            key={opt.value}
-                                            size="sm"
-                                            color={myVote === opt.value ? "primary" : opt.color}
-                                            onClick={() => setRsvp(key, memberName, opt.value)}
-                                        >
-                                            {opt.label}
-                                        </Button>
-                                    ))}
-                                </div>
-
-                                <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                                    {activity.options.map((option) => (
-                                        <div key={option.id} className="rounded-lg bg-secondary px-3 py-2 text-sm">
-                                                <p className="font-medium text-primary">{option.label}</p>
-                                                <p className="text-xs text-tertiary">{option.description}</p>
-                                            </div>
-                                    ))}
-                                </div>
-
-                                <p className="mt-3 text-xs text-quaternary">
-                                    Headcount: {counts.in} in · {counts.maybe} maybe · {counts.out} out
-                                </p>
-
-                                {Object.keys(votes).length > 0 && (
-                                    <ul className="mt-2 space-y-1 text-xs text-secondary">
-                                        {Object.entries(votes).map(([name, status]) => (
-                                            <li key={name}>
-                                                <span className="font-medium">{name}</span> — {status}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </article>
+                                activity={activity}
+                                memberName={memberName}
+                                signups={signups}
+                                onPick={(optionId) => setActivitySignup(key, memberName, optionId)}
+                            />
                         );
                     })}
-                </div>
-            </section>
-
-            <section>
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <h2 className="text-lg font-semibold text-primary">Reservations checklist</h2>
-                        <p className="mt-1 text-sm text-tertiary">Shared across all planners — checkoffs sync live.</p>
-                    </div>
-                    <Button color="secondary" size="sm" onClick={resetChecklist}>
-                        Reset checklist
-                    </Button>
-                </div>
-
-                <ul className="mt-4 space-y-2">
-                    {CHECKLIST.map((item) => {
-                        const checked = state.checklist[item.key]?.done ?? false;
-                        const meta = state.checklist[item.key];
-                        return (
-                            <li
-                                key={item.key}
-                                className={cx(
-                                    "flex gap-3 rounded-xl border border-secondary bg-primary p-3 shadow-xs ring-1 ring-secondary ring-inset",
-                                    checked && "opacity-60",
-                                )}
-                            >
-                                <Checkbox isSelected={checked} onChange={() => toggleChecklist(item.key)} aria-label={item.title} />
-                                <div className="min-w-0 flex-1">
-                                    <p className={cx("font-semibold text-primary", checked && "line-through")}>
-                                        {item.title}
-                                        <span
-                                            className={cx(
-                                                "ml-2 inline-flex rounded px-1.5 py-0.5 text-[10px] font-extrabold uppercase",
-                                                priorityClass[item.priority],
-                                            )}
-                                        >
-                                            {item.priority === "now" ? "Do now" : item.priority === "soon" ? "Soon" : "Flexible"}
-                                        </span>
-                                    </p>
-                                    <p className="text-sm text-tertiary">{item.detail}</p>
-                                    {item.phone && <p className="mt-1 text-sm font-semibold text-brand-secondary">{item.phone}</p>}
-                                    {meta?.doneBy && checked && (
-                                        <p className="mt-1 text-xs text-quaternary">Checked by {meta.doneBy}</p>
-                                    )}
-                                </div>
-                            </li>
-                        );
-                    })}
-                </ul>
-            </section>
+                </section>
+            )}
         </div>
     );
 }

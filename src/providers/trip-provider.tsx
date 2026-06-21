@@ -24,6 +24,7 @@ interface TripContextValue {
     updateMeal: (dayId: DayId, meal: MealType, patch: Partial<MealSlot>) => void;
     updateDayNotes: (dayId: DayId, notes: string) => void;
     setRsvp: (key: string, member: string, status: RsvpStatus) => void;
+    setActivitySignup: (key: string, member: string, optionId: string | null) => void;
     setActivityChoice: (dayId: DayId, optionId: string, notes?: string) => void;
     toggleChecklist: (key: string) => void;
     resetChecklist: () => void;
@@ -33,10 +34,14 @@ const TripContext = createContext<TripContextValue | null>(null);
 
 const LOCAL_KEY = "twain_harte_collab_v1";
 
+function normalizeState(payload: Partial<TripCollaborationState> | null | undefined): TripCollaborationState {
+    return { ...emptyCollaborationState(), ...payload };
+}
+
 function loadLocalState(): TripCollaborationState {
     try {
         const raw = localStorage.getItem(LOCAL_KEY);
-        if (raw) return { ...emptyCollaborationState(), ...JSON.parse(raw) };
+        if (raw) return normalizeState(JSON.parse(raw) as TripCollaborationState);
     } catch {
         /* ignore */
     }
@@ -94,8 +99,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
 
     const applyRemote = useCallback((payload: TripCollaborationState, updatedBy: string | null, updatedAt: string) => {
         if (pendingWrite.current) return;
-        setState(payload);
-        saveLocalState(payload);
+        const merged = normalizeState(payload);
+        setState(merged);
+        saveLocalState(merged);
         setLastUpdatedBy(updatedBy);
         setLastUpdatedAt(updatedAt);
     }, []);
@@ -106,10 +112,36 @@ export function TripProvider({ children }: { children: ReactNode }) {
             return;
         }
 
-        let channel: ReturnType<typeof supabase.channel> | null = null;
+        let cancelled = false;
+        const client = supabase;
 
-        (async () => {
-            const { data, error } = await supabase!.from("trip_state").select("*").eq("id", TRIP_STATE_ID).maybeSingle();
+        // Register listeners before subscribe — must be synchronous (StrictMode-safe).
+        const channel = client
+            .channel(`trip-state:${TRIP_STATE_ID}`)
+            .on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "trip_state", filter: `id=eq.${TRIP_STATE_ID}` },
+                (payload) => {
+                    if (cancelled) return;
+                    const row = payload.new as {
+                        payload: TripCollaborationState;
+                        updated_by: string | null;
+                        updated_at: string;
+                    };
+                    if (row?.payload) {
+                        applyRemote(row.payload, row.updated_by, row.updated_at);
+                    }
+                },
+            )
+            .subscribe((status) => {
+                if (cancelled) return;
+                if (status === "SUBSCRIBED") setSyncStatus("connected");
+                if (status === "CHANNEL_ERROR") setSyncStatus("error");
+            });
+
+        void (async () => {
+            const { data, error } = await client.from("trip_state").select("*").eq("id", TRIP_STATE_ID).maybeSingle();
+            if (cancelled) return;
 
             if (error) {
                 setSyncStatus("error");
@@ -120,26 +152,11 @@ export function TripProvider({ children }: { children: ReactNode }) {
             if (data?.payload && Object.keys(data.payload).length > 0) {
                 applyRemote(data.payload as TripCollaborationState, data.updated_by, data.updated_at);
             }
-
-            setSyncStatus("connected");
-
-            channel = supabase!
-                .channel("trip-state")
-                .on(
-                    "postgres_changes",
-                    { event: "*", schema: "public", table: "trip_state", filter: `id=eq.${TRIP_STATE_ID}` },
-                    (payload) => {
-                        const row = payload.new as { payload: TripCollaborationState; updated_by: string | null; updated_at: string };
-                        if (row?.payload) {
-                            applyRemote(row.payload, row.updated_by, row.updated_at);
-                        }
-                    },
-                )
-                .subscribe();
         })();
 
         return () => {
-            if (channel) supabase!.removeChannel(channel);
+            cancelled = true;
+            void client.removeChannel(channel);
             if (debounceRef.current) clearTimeout(debounceRef.current);
         };
     }, [applyRemote]);
@@ -197,6 +214,27 @@ export function TripProvider({ children }: { children: ReactNode }) {
         [mutate],
     );
 
+    const setActivitySignup = useCallback(
+        (key: string, member: string, optionId: string | null) => {
+            mutate((prev) => {
+                const current = { ...(prev.activitySignups[key] ?? {}) };
+                if (optionId) {
+                    current[member] = optionId;
+                } else {
+                    delete current[member];
+                }
+                return {
+                    ...prev,
+                    activitySignups: {
+                        ...prev.activitySignups,
+                        [key]: current,
+                    },
+                };
+            });
+        },
+        [mutate],
+    );
+
     const setActivityChoice = useCallback(
         (dayId: DayId, optionId: string, notes?: string) => {
             mutate((prev) => ({
@@ -243,6 +281,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
             updateMeal,
             updateDayNotes,
             setRsvp,
+            setActivitySignup,
             setActivityChoice,
             toggleChecklist,
             resetChecklist,
@@ -257,6 +296,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
             updateMeal,
             updateDayNotes,
             setRsvp,
+            setActivitySignup,
             setActivityChoice,
             toggleChecklist,
             resetChecklist,

@@ -1,20 +1,24 @@
 import { ACTIVITY_MENU, GAME_NIGHT, LOCAL_GEMS } from "@/data/trip-content";
-import { TripBadge } from "@/components/trip/trip-ui";
+import { PanelHeader, PhoneLine, TripBadge } from "@/components/trip/trip-ui";
 
 function ActivityCardGrid({ cards }: { cards: typeof ACTIVITY_MENU }) {
     return (
         <div className="grid gap-4 sm:grid-cols-2">
             {cards.map((card) => (
-                <article key={card.title} className="rounded-2xl border border-secondary bg-primary p-4 shadow-xs ring-1 ring-secondary ring-inset">
-                    <h4 className="font-semibold text-primary">{card.title}</h4>
-                    <p className="text-xs font-semibold text-tertiary">{card.distance}</p>
-                    <p className="mt-2 text-sm text-secondary">{card.body}</p>
-                    {card.lines?.map((line) => (
-                        <p key={line} className="mt-1 text-sm text-secondary">
-                            {line}
-                        </p>
-                    ))}
-                    <div className="mt-3 flex flex-wrap gap-1">
+                <article key={card.title} className="trip-card flex flex-col p-4 sm:p-5">
+                    <h4 className="text-[var(--trip-title-card)] font-semibold leading-snug tracking-tight text-primary">{card.title}</h4>
+                    <p className="mt-1.5 text-[var(--trip-caption)] font-semibold uppercase tracking-wide text-tertiary">{card.distance}</p>
+                    <p className="mt-2.5 flex-1 text-[var(--trip-body-sm)] leading-relaxed text-secondary sm:text-[var(--trip-body)]">{card.body}</p>
+                    {card.lines?.map((line) =>
+                        line.includes("(") && line.includes(")") ? (
+                            <PhoneLine key={line} line={line} />
+                        ) : (
+                            <p key={line} className="mt-1 text-sm text-secondary">
+                                {line}
+                            </p>
+                        ),
+                    )}
+                    <div className="mt-3 flex flex-wrap gap-1.5">
                         {card.badges.map((b) => (
                             <TripBadge key={b.label} label={b.label} tone={b.tone} />
                         ))}
@@ -27,30 +31,21 @@ function ActivityCardGrid({ cards }: { cards: typeof ACTIVITY_MENU }) {
 
 export function ActivitiesReferencePanel() {
     return (
-        <div className="space-y-4">
-            <div>
-                <h2 className="text-lg font-semibold text-primary">Activity menu</h2>
-                <p className="mt-1 text-sm text-tertiary">Best options within ~45 min (Knights Ferry is the longer exception).</p>
-            </div>
+        <div className="space-y-6">
+            <PanelHeader title="Day trips" description="Most are within 45 minutes. Knights Ferry is ~1 hour each way." />
             <ActivityCardGrid cards={ACTIVITY_MENU} />
-            <p className="rounded-xl border border-dashed border-secondary bg-secondary px-3 py-2 text-sm text-tertiary">
-                With a &quot;do it right&quot; budget, grab a Pinecrest party boat early (maybe two for 18 people) and book Knights Ferry only if
-                the crew wants the full float.
-            </p>
+            <p className="trip-callout">Book Pinecrest boats early — two boats if all 18 want to go together.</p>
         </div>
     );
 }
 
 export function GemsReferencePanel() {
     return (
-        <div className="space-y-6">
-            <div>
-                <h2 className="text-lg font-semibold text-primary">Local gems</h2>
-                <p className="mt-1 text-sm text-tertiary">What the guidebooks skip — grouped by vibe with honest access notes.</p>
-            </div>
+        <div className="space-y-8">
+            <PanelHeader title="Extras" description="Evenings, backups, and side trips." />
             {LOCAL_GEMS.map((group) => (
                 <section key={group.section}>
-                    <h3 className="mb-3 text-md font-semibold text-brand-secondary">{group.section}</h3>
+                    <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-brand-secondary">{group.section}</h3>
                     <ActivityCardGrid cards={group.cards} />
                 </section>
             ))}
@@ -60,41 +55,42 @@ export function GemsReferencePanel() {
 
 export function GameNightReferencePanel() {
     return (
-        <div className="space-y-4">
-            <div>
-                <h2 className="text-lg font-semibold text-primary">Patterson Family Game Night</h2>
-                <p className="mt-1 text-sm text-tertiary">{GAME_NIGHT.intro}</p>
-            </div>
+        <div className="space-y-6">
+            <PanelHeader title="Game Night" description={GAME_NIGHT.intro} />
 
-            <article className="rounded-2xl border border-secondary bg-primary p-4 shadow-xs ring-1 ring-secondary ring-inset">
+            <article className="trip-card p-4 sm:p-5">
                 <h3 className="font-semibold text-primary">Format</h3>
-                <p className="mt-2 text-sm text-secondary">{GAME_NIGHT.format}</p>
+                <p className="mt-2 text-sm leading-relaxed text-secondary">{GAME_NIGHT.format}</p>
             </article>
 
-            <article className="rounded-2xl border border-secondary bg-primary p-4 shadow-xs ring-1 ring-secondary ring-inset">
-                <h3 className="font-semibold text-primary">Pool relay stations</h3>
-                <div className="mt-3 space-y-3">
+            <article className="trip-card p-4 sm:p-5">
+                <h3 className="font-semibold text-primary">Pool relay</h3>
+                <div className="mt-4 space-y-4">
                     {GAME_NIGHT.stations.map((s) => (
-                        <div key={s.name} className="border-l-3 border-brand-solid pl-3">
+                        <div key={s.name} className="border-l-[3px] border-brand-solid pl-4">
                             <p className="font-semibold text-primary">
-                                {s.name} <span className="text-sm text-utility-error-600">{s.points}</span>
+                                {s.name}{" "}
+                                <span className="text-sm font-bold text-[#b5495b]">{s.points}</span>
                             </p>
-                            <p className="text-sm text-secondary">{s.detail}</p>
+                            <p className="mt-0.5 text-sm leading-relaxed text-secondary">{s.detail}</p>
                         </div>
                     ))}
                 </div>
             </article>
 
-            <article className="rounded-2xl border border-secondary bg-primary p-4 shadow-xs ring-1 ring-secondary ring-inset">
-                <h3 className="font-semibold text-primary">Dry round — Patterson Family Feud</h3>
-                <p className="mt-2 text-sm text-secondary">{GAME_NIGHT.feud}</p>
+            <article className="trip-card p-4 sm:p-5">
+                <h3 className="font-semibold text-primary">Family Feud</h3>
+                <p className="mt-2 text-sm leading-relaxed text-secondary">{GAME_NIGHT.feud}</p>
             </article>
 
-            <article className="rounded-2xl border border-secondary bg-primary p-4 shadow-xs ring-1 ring-secondary ring-inset">
-                <h3 className="font-semibold text-primary">Equipment kit</h3>
+            <article className="trip-card p-4 sm:p-5">
+                <h3 className="font-semibold text-primary">Bring</h3>
                 <div className="mt-3 flex flex-wrap gap-2">
                     {GAME_NIGHT.equipment.map((item) => (
-                        <span key={item} className="rounded-full border border-secondary bg-secondary px-3 py-1 text-sm text-secondary">
+                        <span
+                            key={item}
+                            className="rounded-full border border-secondary bg-secondary/80 px-3 py-1.5 text-sm text-secondary"
+                        >
                             {item}
                         </span>
                     ))}

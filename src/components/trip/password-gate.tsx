@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Lock01 } from "@untitledui/icons";
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
-import { FeaturedIcon } from "@/components/foundations/featured-icon/featured-icon";
 import {
     formatRetryAfter,
     getRateLimitStatus,
@@ -59,9 +58,7 @@ export function PasswordGate({ onSuccess }: PasswordGateProps) {
         if (after.locked) {
             setError(`Too many attempts. Try again in ${formatRetryAfter(after.retryAfterMs)}.`);
         } else {
-            setError(
-                `Wrong password — ask a Patterson planner for access. ${after.attemptsRemaining} attempt${after.attemptsRemaining === 1 ? "" : "s"} remaining.`,
-            );
+            setError(`Wrong password. ${after.attemptsRemaining} attempt${after.attemptsRemaining === 1 ? "" : "s"} remaining.`);
         }
         setPassword("");
     }
@@ -69,55 +66,56 @@ export function PasswordGate({ onSuccess }: PasswordGateProps) {
     const locked = rateLimit.locked;
 
     return (
-        <div className="flex min-h-dvh items-center justify-center bg-primary px-4 py-10">
-            <div className="w-full max-w-md rounded-2xl border border-secondary bg-primary p-6 shadow-lg ring-1 ring-secondary ring-inset sm:p-8">
-                <div className="flex flex-col items-center text-center">
-                    <FeaturedIcon icon={Lock01} color="brand" theme="modern" size="lg" />
-                    <h1 className="mt-4 text-display-xs font-semibold text-primary">Patterson Trip Hub</h1>
-                    <p className="mt-2 text-sm text-tertiary">Twain Harte · Jun 23–27, 2026 · family only</p>
+        <div className="trip-surface flex min-h-dvh flex-col">
+            <div className="trip-hero px-4 py-10 text-center sm:px-6">
+                <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-[var(--trip-accent-soft)]">
+                    <Lock01 className="size-8 text-[var(--trip-accent)]" />
                 </div>
+                <h1 className="trip-hero-title mt-5">Trip hub</h1>
+                <p className="trip-hero-meta mt-2">Twain Harte · Jun 23–27, 2026</p>
+            </div>
 
-                {locked && (
-                    <div
-                        className="mt-6 rounded-xl border border-utility-error-200 bg-utility-error-50 px-3 py-2.5 text-sm text-utility-error-800"
-                        role="alert"
-                    >
-                        Sign-in paused for {formatRetryAfter(rateLimit.retryAfterMs)} after too many failed attempts.
-                    </div>
-                )}
-
-                <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
-                    <Input
-                        label="Family password"
-                        type="password"
-                        value={password}
-                        onChange={setPassword}
-                        placeholder="Enter password"
-                        isRequired
-                        isDisabled={locked}
-                    />
-                    {error && (
-                        <p className="text-sm text-error-primary" role="alert">
-                            {error}
-                        </p>
+            <div className="mx-auto w-full max-w-md flex-1 px-4 py-8 sm:px-6">
+                <div className="trip-card p-6 sm:p-8">
+                    {locked && (
+                        <div
+                            className="mb-6 rounded-xl border border-[var(--trip-separator)] bg-secondary px-4 py-3 text-[var(--trip-body-sm)] text-secondary"
+                            role="alert"
+                        >
+                            Sign-in paused for {formatRetryAfter(rateLimit.retryAfterMs)}.
+                        </div>
                     )}
-                    {!locked && rateLimit.attemptsRemaining < MAX_ATTEMPTS_BEFORE_LOCKOUT && rateLimit.attemptsRemaining > 0 && !error && (
-                        <p className="text-xs text-quaternary">{rateLimit.attemptsRemaining} attempts remaining before lockout.</p>
-                    )}
-                    <Button
-                        type="submit"
-                        color="primary"
-                        size="lg"
-                        className="w-full"
-                        isDisabled={loading || !password || locked}
-                    >
-                        {loading ? "Checking…" : locked ? "Try again later" : "Enter trip hub"}
-                    </Button>
-                </form>
 
-                <p className="mt-6 text-center text-xs text-quaternary">
-                    Shared planning for adult coordinators. Changes sync live when Supabase is configured.
-                </p>
+                    <form className="space-y-5" onSubmit={handleSubmit}>
+                        <Input
+                            label="Password"
+                            type="password"
+                            value={password}
+                            onChange={setPassword}
+                            placeholder="Password"
+                            isRequired
+                            isDisabled={locked}
+                        />
+                        {error && (
+                            <p className="text-[var(--trip-body-sm)] text-error-primary" role="alert">
+                                {error}
+                            </p>
+                        )}
+                        {!locked &&
+                            rateLimit.attemptsRemaining < MAX_ATTEMPTS_BEFORE_LOCKOUT &&
+                            rateLimit.attemptsRemaining > 0 &&
+                            !error && (
+                                <p className="text-[var(--trip-caption)] text-quaternary">
+                                    {rateLimit.attemptsRemaining} attempts before lockout
+                                </p>
+                            )}
+                        <Button type="submit" color="primary" size="lg" className="min-h-[3rem] w-full text-base" isDisabled={loading || !password || locked}>
+                            {loading ? "Checking…" : locked ? "Try again later" : "Continue"}
+                        </Button>
+                    </form>
+
+                    <p className="mt-6 text-center text-[var(--trip-caption)] leading-relaxed text-quaternary">Family only.</p>
+                </div>
             </div>
         </div>
     );
