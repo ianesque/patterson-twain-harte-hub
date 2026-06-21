@@ -1,0 +1,20 @@
+/* Patterson reunion palette on Untitled UI brand tokens */
+:root {
+    --color-brand-25: #f4f7f3;
+    --color-brand-50: #eef4ef;
+    --color-brand-100: #d9e2dd;
+    --color-brand-200: #b8d4cb;
+    --color-brand-300: #7fb8a8;
+    --color-brand-400: #2a9d8f;
+    --color-brand-500: #1f5e4f;
+    --color-brand-600: #163f36;
+    --color-brand-700: #123329;
+    --color-brand-800: #0e2821;
+    --color-brand-900: #0a1e19;
+    --color-brand-950: #061410;
+}
+
+.dark-mode {
+    --color-brand-400: #3eb3a4;
+    --color-brand-500: #2a9d8f;
+}
