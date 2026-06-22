@@ -11,9 +11,25 @@ import {
 } from "@untitledui/icons";
 import { TextArea } from "@/components/base/textarea/textarea";
 import { DAYS, TRIP_META } from "@/data/trip-content";
+import { YourStaySection } from "@/components/trip/your-stay-section";
 import { DayHeader, EffortBox, getTripDayHighlight, PanelHeader } from "@/components/trip/trip-ui";
 import { useTrip } from "@/providers/trip-provider";
 import { cx } from "@/utils/cx";
+
+const PLAN_TAB_KEY = "twain_harte_plan_tab";
+
+const PLAN_SUBTABS = [
+    { id: "activities", label: "Activities" },
+    { id: "rooms", label: "Rooms" },
+] as const;
+
+type PlanSubTab = (typeof PLAN_SUBTABS)[number]["id"];
+
+function readPlanSubTab(): PlanSubTab {
+    const stored = sessionStorage.getItem(PLAN_TAB_KEY);
+    if (stored === "rooms") return "rooms";
+    return "activities";
+}
 
 const ROW_ICON_MAP: Record<string, ComponentType<{ className?: string }>> = {
     "🏠": HomeLine,
@@ -42,7 +58,7 @@ function PlanRowIcon({ emoji }: { emoji: string }) {
     );
 }
 
-export function PlanPanel() {
+function ActivitiesSubPanel() {
     const { state, updateDayNotes } = useTrip();
     const [activeDay, setActiveDay] = useState<string>(DAYS[0]?.id ?? "");
     const observerRef = useRef<IntersectionObserver | null>(null);
@@ -153,6 +169,46 @@ export function PlanPanel() {
                     </article>
                 );
             })}
+        </div>
+    );
+}
+
+export function PlanPanel() {
+    const [subTab, setSubTab] = useState<PlanSubTab>(() => readPlanSubTab());
+
+    useEffect(() => {
+        sessionStorage.setItem(PLAN_TAB_KEY, subTab);
+    }, [subTab]);
+
+    return (
+        <div className="space-y-5">
+            <div
+                className="flex gap-1 overflow-x-auto rounded-xl bg-secondary p-1 ring-1 ring-[var(--trip-separator)] ring-inset scrollbar-hide"
+                role="tablist"
+                aria-label="Plan sections"
+            >
+                {PLAN_SUBTABS.map(({ id, label }) => (
+                    <button
+                        key={id}
+                        type="button"
+                        role="tab"
+                        data-active={subTab === id}
+                        aria-selected={subTab === id}
+                        className="trip-coordinate-tab"
+                        onClick={() => setSubTab(id)}
+                    >
+                        {label}
+                    </button>
+                ))}
+            </div>
+
+            {subTab === "activities" && <ActivitiesSubPanel />}
+            {subTab === "rooms" && (
+                <div className="space-y-5">
+                    <PanelHeader title="Rooms" description="Where we're sleeping — find your household first." />
+                    <YourStaySection />
+                </div>
+            )}
         </div>
     );
 }

@@ -3,7 +3,6 @@ import {
     Calendar,
     CheckCircle,
     MarkerPin01,
-    Building07,
     BookOpen01,
     User01,
     HomeLine,
@@ -11,7 +10,6 @@ import {
 import { CoordinatePanel } from "@/components/trip/coordinate-panel";
 import { GuidePanel, type GuideTabId } from "@/components/trip/guide-panel";
 import { MealsPanel } from "@/components/trip/meals-panel";
-import { StayPanel } from "@/components/trip/stay-panel";
 import { HouseholdInitials } from "@/components/trip/household-initials";
 import { MemberPicker } from "@/components/trip/member-picker";
 import { PlanPanel } from "@/components/trip/plan-panel";
@@ -27,7 +25,6 @@ const GUIDE_KEY = "twain_harte_guide_tab";
 
 const MAIN_TABS = [
     { id: "plan", label: "Plan", icon: Calendar },
-    { id: "stay", label: "Stay", icon: Building07 },
     { id: "meals", label: "Meals", icon: HomeLine },
     { id: "coordinate", label: "Coordinate", icon: CheckCircle },
     { id: "guide", label: "Guide", icon: BookOpen01 },
@@ -35,7 +32,10 @@ const MAIN_TABS = [
 
 function TripShell() {
     const { memberName, savedFlash } = useTrip();
-    const [tab, setTab] = useState(() => sessionStorage.getItem(TAB_KEY) ?? "plan");
+    const [tab, setTab] = useState(() => {
+        const stored = sessionStorage.getItem(TAB_KEY) ?? "plan";
+        return stored === "stay" ? "plan" : stored;
+    });
     const [guideTab, setGuideTab] = useState<GuideTabId>(() => {
         const stored = sessionStorage.getItem(GUIDE_KEY);
         return stored === "gems" || stored === "game" ? stored : "activities";
@@ -116,7 +116,6 @@ function TripShell() {
             <main className="trip-main-pad mx-auto max-w-5xl px-4 py-5 sm:px-6 sm:py-8">
                 <div key={tab} className="trip-panel-enter">
                     {tab === "plan" && <PlanPanel />}
-                    {tab === "stay" && <StayPanel />}
                     {tab === "meals" && <MealsPanel />}
                     {tab === "coordinate" && <CoordinatePanel />}
                     {tab === "guide" && <GuidePanel active={guideTab} onChange={setGuideTab} />}

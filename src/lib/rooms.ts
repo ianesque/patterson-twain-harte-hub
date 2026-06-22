@@ -83,3 +83,61 @@ export function formatRoommates(
 export function locationLabel(location: TripRoom["location"]): string {
     return ROOM_LOCATION_LABELS[location];
 }
+
+export type SleepingPlanRow = {
+    room: TripRoom;
+    people: string[];
+};
+
+/** People in the signed-in household → room, grouped by room */
+export function getYourSleepingPlan(memberName: string, roomAssignments: Record<string, string>): SleepingPlanRow[] {
+    const rows: SleepingPlanRow[] = [];
+
+    for (const room of TRIP_ROOMS) {
+        if (room.offLimits) continue;
+        if (!roomMatchesHousehold(room, memberName, roomAssignments)) continue;
+
+        const assignees = getResolvedAssignees(room, roomAssignments);
+        const people: string[] = [];
+
+        for (const assignee of assignees) {
+            if (assignee.type === "household" && assignee.household === memberName) {
+                people.push(assignee.household);
+            } else if (assignee.type === "person" && assignee.household === memberName) {
+                people.push(assignee.note ? `${assignee.name} (${assignee.note})` : assignee.name);
+            }
+        }
+
+        const claimed = getClaimedHousehold(room, roomAssignments);
+        if (claimed === memberName && people.length === 0) {
+            people.push(memberName);
+        }
+
+        if (people.length > 0) {
+            rows.push({ room, people });
+        }
+    }
+
+    return rows;
+}
+
+/** Short room labels for the "You're in:" summary — disambiguates duplicate names */
+export function getYourRoomSummaryLabels(memberName: string, roomAssignments: Record<string, string>): string[] {
+    const rooms = getYourRooms(memberName, roomAssignments);
+    const nameCounts = new Map<string, number>();
+
+    for (const room of rooms) {
+        nameCounts.set(room.name, (nameCounts.get(room.name) ?? 0) + 1);
+    }
+
+    return rooms.map((room) => {
+        if ((nameCounts.get(room.name) ?? 0) > 1) {
+            return `${room.name} (${locationLabel(room.location)})`;
+        }
+        return room.name;
+    });
+}
+
+export function formatRoomDestination(room: TripRoom): string {
+    return `${room.name} · ${locationLabel(room.location)}`;
+}

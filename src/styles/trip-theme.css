@@ -1465,14 +1465,119 @@ body {
 
 /* —— Stay / accommodations —— */
 
-.trip-your-rooms {
+.trip-sleeping-plan-card {
     border-radius: 1.25rem;
     border: 1px solid color-mix(in srgb, var(--trip-accent) 28%, var(--trip-separator));
     background: color-mix(in srgb, var(--trip-accent-soft) 55%, var(--trip-bg-elevated));
+    padding: 1.125rem 1.25rem;
+}
+
+.trip-sleeping-plan-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.875rem;
+}
+
+.trip-sleeping-plan-kicker {
+    font-size: var(--trip-caption);
+    font-weight: 600;
+    color: var(--trip-label);
+}
+
+.trip-sleeping-plan-answer {
+    margin-top: 0.25rem;
+    font-size: var(--trip-title-card);
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+    color: var(--trip-text);
+}
+
+.trip-sleeping-plan-rooms {
+    color: var(--trip-accent);
+}
+
+.trip-sleeping-plan-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 0.5px solid color-mix(in srgb, var(--trip-accent) 18%, var(--trip-separator));
+}
+
+.trip-sleeping-plan-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.375rem 0.5rem;
+    font-size: var(--trip-body-sm);
+    line-height: 1.45;
+}
+
+.trip-sleeping-plan-people {
+    font-weight: 600;
+    color: var(--trip-text);
+}
+
+.trip-sleeping-plan-arrow {
+    color: var(--trip-label);
+}
+
+.trip-sleeping-plan-destination {
+    color: var(--trip-text-secondary);
+}
+
+.trip-claim-tbd {
+    border-radius: 0.875rem;
+    border: 0.5px dashed color-mix(in srgb, var(--trip-accent) 35%, var(--trip-separator));
+    background: var(--trip-bg-elevated);
+    padding: 0.875rem 1rem;
+}
+
+.trip-claim-tbd-label {
+    font-size: var(--trip-caption);
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--trip-text-secondary);
+}
+
+.trip-claim-tbd-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.625rem;
+}
+
+.trip-stay-off-limits-compact {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    border-radius: 0.625rem;
+    border: 0.5px solid color-mix(in srgb, var(--trip-danger) 30%, var(--trip-separator));
+    background: color-mix(in srgb, var(--trip-danger) 6%, var(--trip-bg-secondary));
+    padding: 0.625rem 0.875rem;
+    font-size: var(--trip-caption);
+    line-height: 1.45;
+    color: var(--trip-text-secondary);
+}
+
+.trip-stay-off-limits-compact-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+    color: var(--trip-danger);
+}
+
+.trip-all-rooms {
+    border-radius: 1.25rem;
+    border: 1px solid var(--trip-separator);
+    background: var(--trip-bg-elevated);
     overflow: hidden;
 }
 
-.trip-your-rooms-toggle {
+.trip-all-rooms-toggle {
     display: flex;
     width: 100%;
     align-items: center;
@@ -1483,18 +1588,17 @@ body {
     transition: background 0.15s ease;
 }
 
-.trip-your-rooms-toggle:active {
-    background: color-mix(in srgb, var(--trip-accent-soft) 80%, transparent);
+.trip-all-rooms-toggle:active {
+    background: var(--trip-bg-subtle);
 }
 
-.trip-your-rooms-title {
-    font-size: var(--trip-title-card);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: var(--trip-text);
+.trip-all-rooms-title {
+    font-size: var(--trip-body-sm);
+    font-weight: 600;
+    color: var(--trip-label);
 }
 
-.trip-your-rooms-chevron {
+.trip-all-rooms-chevron {
     width: 1.25rem;
     height: 1.25rem;
     flex-shrink: 0;
@@ -1502,102 +1606,16 @@ body {
     transition: transform 0.2s ease;
 }
 
-.trip-your-rooms-chevron--open {
+.trip-all-rooms-chevron--open {
     transform: rotate(180deg);
 }
 
-.trip-your-rooms-body {
+.trip-all-rooms-body {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1.25rem;
     padding: 0 1.125rem 1.125rem;
-    border-top: 0.5px solid color-mix(in srgb, var(--trip-accent) 18%, var(--trip-separator));
-}
-
-.trip-your-room-card {
-    border-radius: 0.875rem;
-    border: 0.5px solid var(--trip-separator);
-    background: var(--trip-bg-elevated);
-    padding: 0.875rem 1rem;
-}
-
-.trip-your-room-card-top {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.375rem 0.75rem;
-}
-
-.trip-your-room-name {
-    font-size: var(--trip-body-sm);
-    font-weight: 700;
-    color: var(--trip-text);
-}
-
-.trip-your-room-location {
-    font-size: var(--trip-caption);
-    font-weight: 600;
-    color: var(--trip-sage);
-}
-
-.trip-your-room-roommates {
-    margin-top: 0.375rem;
-    font-size: var(--trip-caption);
-    line-height: 1.45;
-    color: var(--trip-text-secondary);
-}
-
-.trip-your-rooms-tbd {
-    border-radius: 0.875rem;
-    border: 0.5px dashed color-mix(in srgb, var(--trip-accent) 35%, var(--trip-separator));
-    background: color-mix(in srgb, var(--trip-bg-elevated) 90%, transparent);
-    padding: 0.875rem 1rem;
-}
-
-.trip-your-rooms-tbd-label {
-    font-size: var(--trip-body-sm);
-    font-weight: 600;
-    line-height: 1.45;
-    color: var(--trip-text);
-}
-
-.trip-your-rooms-claim-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-}
-
-.trip-stay-off-limits {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.875rem;
-    border-radius: 0.875rem;
-    border: 1px solid color-mix(in srgb, var(--trip-danger) 35%, var(--trip-separator));
-    background: color-mix(in srgb, var(--trip-danger) 8%, var(--trip-bg-secondary));
-    padding: 1rem 1.125rem;
-}
-
-.trip-stay-off-limits-icon {
-    width: 1.25rem;
-    height: 1.25rem;
-    flex-shrink: 0;
-    margin-top: 0.125rem;
-    color: var(--trip-danger);
-}
-
-.trip-stay-off-limits-title {
-    font-size: var(--trip-body-sm);
-    font-weight: 700;
-    color: var(--trip-text);
-}
-
-.trip-stay-off-limits-body {
-    margin-top: 0.25rem;
-    font-size: var(--trip-caption);
-    line-height: 1.45;
-    color: var(--trip-text-secondary);
+    border-top: 0.5px solid var(--trip-separator);
 }
 
 .trip-stay-room-grid {
