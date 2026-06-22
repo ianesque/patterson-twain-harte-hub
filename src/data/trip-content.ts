@@ -79,7 +79,7 @@ export const DAYS: DayPlan[] = [
             {
                 icon: "🏠",
                 title: "Check-in 4 PM",
-                body: "Stop for groceries and firewood in Sonora on the way up.",
+                body: "",
             },
             {
                 icon: "🏊",
@@ -89,7 +89,7 @@ export const DAYS: DayPlan[] = [
             {
                 icon: "🍦",
                 title: "Welcome dinner",
-                body: "At the house, or a quick drive to Twain Harte Creamery on Fuller Rd (~5 min) if there's daylight.",
+                body: "At the house. For dessert, Harte Creamery is 5 min drive away.",
             },
         ],
     },

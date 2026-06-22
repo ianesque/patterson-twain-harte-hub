@@ -136,11 +136,15 @@ export function PlanPanel() {
                                     <PlanRowIcon emoji={row.icon} />
                                     <p>
                                         <span className="font-semibold text-primary">{row.title}</span>
-                                        <span className="trip-plan-row-sep" aria-hidden>
-                                            {" "}
-                                            —{" "}
-                                        </span>
-                                        {row.body}
+                                        {row.body ? (
+                                            <>
+                                                <span className="trip-plan-row-sep" aria-hidden>
+                                                    {" "}
+                                                    —{" "}
+                                                </span>
+                                                {row.body}
+                                            </>
+                                        ) : null}
                                     </p>
                                 </div>
                             ))}
