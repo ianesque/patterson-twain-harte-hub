@@ -682,8 +682,8 @@ export const TRIP_ROOMS: TripRoom[] = [
         location: "main-house",
         assignees: [
             { type: "person", name: "Arielle", household: "Ian & Kimberly" },
-            { type: "person", name: "Asher", household: "Ian & Kimberly" },
-            { type: "person", name: "Brynn", household: "Ian & Kimberly" },
+            { type: "person", name: "Asher", household: "Ben & Stephanie" },
+            { type: "person", name: "Brynn", household: "Ben & Stephanie" },
         ],
     },
     {
@@ -719,9 +719,9 @@ export const TRIP_ROOMS: TripRoom[] = [
         name: "Bunk room 2",
         location: "barn",
         assignees: [
-            { type: "person", name: "Malakhi", household: "Gabe" },
-            { type: "person", name: "Isaiah", household: "Gabe" },
-            { type: "person", name: "Declan", household: "Gabe" },
+            { type: "person", name: "Malakhi", household: "Darren & Alicia" },
+            { type: "person", name: "Isaiah", household: "Darren & Alicia" },
+            { type: "person", name: "Declan", household: "Ben & Stephanie" },
             { type: "person", name: "Gabe", household: "Gabe" },
         ],
     },

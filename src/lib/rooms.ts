@@ -87,7 +87,15 @@ export function locationLabel(location: TripRoom["location"]): string {
 export type SleepingPlanRow = {
     room: TripRoom;
     people: string[];
+    /** Shown instead of formatRoomDestination when parents' room is still TBD */
+    destinationOverride?: string;
 };
+
+function formatClaimableDestination(rooms: TripRoom[]): string {
+    const names = rooms.map((room) => room.name).join(" or ");
+    const location = rooms[0] ? locationLabel(rooms[0].location) : "";
+    return `TBD — ${names} · ${location}`;
+}
 
 /** People in the signed-in household → room, grouped by room */
 export function getYourSleepingPlan(memberName: string, roomAssignments: Record<string, string>): SleepingPlanRow[] {
@@ -118,6 +126,18 @@ export function getYourSleepingPlan(memberName: string, roomAssignments: Record<
         }
     }
 
+    const hasParentRow = rows.some((row) => row.people.some((person) => person === memberName));
+    if (!hasParentRow) {
+        const claimable = getClaimableRooms(memberName, roomAssignments);
+        if (claimable.length > 0) {
+            rows.unshift({
+                room: claimable[0],
+                people: [memberName],
+                destinationOverride: formatClaimableDestination(claimable),
+            });
+        }
+    }
+
     return rows;
 }
 
@@ -130,12 +150,19 @@ export function getYourRoomSummaryLabels(memberName: string, roomAssignments: Re
         nameCounts.set(room.name, (nameCounts.get(room.name) ?? 0) + 1);
     }
 
-    return rooms.map((room) => {
+    const labels = rooms.map((room) => {
         if ((nameCounts.get(room.name) ?? 0) > 1) {
             return `${room.name} (${locationLabel(room.location)})`;
         }
         return room.name;
     });
+
+    const claimable = getClaimableRooms(memberName, roomAssignments);
+    if (claimable.length > 0 && !rooms.some((room) => getClaimedHousehold(room, roomAssignments) === memberName)) {
+        labels.unshift("TBD");
+    }
+
+    return labels;
 }
 
 export function formatRoomDestination(room: TripRoom): string {

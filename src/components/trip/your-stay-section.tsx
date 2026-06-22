@@ -188,13 +188,15 @@ function SleepingPlanCard({
             </div>
 
             <ul className="trip-sleeping-plan-list">
-                {sleepingPlan.map(({ room, people }) => (
+                {sleepingPlan.map(({ room, people, destinationOverride }) => (
                     <li key={room.id} className="trip-sleeping-plan-row">
                         <span className="trip-sleeping-plan-people">{people.join(", ")}</span>
                         <span className="trip-sleeping-plan-arrow" aria-hidden>
                             →
                         </span>
-                        <span className="trip-sleeping-plan-destination">{formatRoomDestination(room)}</span>
+                        <span className="trip-sleeping-plan-destination">
+                            {destinationOverride ?? formatRoomDestination(room)}
+                        </span>
                     </li>
                 ))}
             </ul>
