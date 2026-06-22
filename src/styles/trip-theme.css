@@ -1463,6 +1463,141 @@ body {
     border: 1.5px solid color-mix(in srgb, var(--trip-separator) 80%, transparent);
 }
 
+/* —— Plan: dismissable rooms banner —— */
+
+.trip-plan-rooms-banner {
+    position: relative;
+    border-radius: 1.25rem;
+    border: 0.5px solid var(--trip-separator);
+    background: var(--trip-bg-elevated);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    animation: trip-fade-up 0.45s ease both;
+}
+
+.dark-mode .trip-plan-rooms-banner {
+    box-shadow: none;
+}
+
+.trip-plan-rooms-banner::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--trip-sage) 0%, color-mix(in srgb, var(--trip-sage) 55%, var(--trip-accent)) 100%);
+}
+
+.trip-plan-rooms-banner-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1.125rem 1.25rem 0.875rem 1.375rem;
+    border-bottom: 0.5px solid var(--trip-separator);
+    background: color-mix(in srgb, var(--trip-sage-soft) 35%, var(--trip-bg-elevated));
+}
+
+.trip-plan-rooms-banner-title {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.trip-plan-rooms-banner-icon-wrap {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.625rem;
+    background: var(--trip-sage-soft);
+    color: var(--trip-sage);
+}
+
+.trip-plan-rooms-banner-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.trip-plan-rooms-banner-heading {
+    font-family: var(--font-display);
+    font-size: var(--trip-title-card);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: var(--trip-text);
+}
+
+.trip-plan-rooms-banner-desc {
+    margin-top: 0.125rem;
+    font-size: var(--trip-caption);
+    line-height: 1.45;
+    color: var(--trip-label);
+}
+
+.trip-plan-rooms-dismiss {
+    flex-shrink: 0;
+    margin: -0.25rem -0.25rem 0 0;
+}
+
+.trip-plan-rooms-banner-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 1.25rem 0.875rem 1.375rem;
+}
+
+.trip-plan-rooms-banner-body .trip-sleeping-plan-card {
+    border: none;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+}
+
+.trip-plan-rooms-banner-body .trip-sleeping-plan-list {
+    border-top-color: var(--trip-separator);
+}
+
+.trip-plan-rooms-banner-body .trip-all-rooms {
+    border-radius: 0.875rem;
+}
+
+.trip-plan-rooms-banner-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.625rem 1.25rem 1rem 1.375rem;
+    border-top: 0.5px solid var(--trip-separator);
+    background: var(--trip-bg-secondary);
+}
+
+.trip-plan-rooms-reveal {
+    margin: 0;
+    animation: trip-fade-in 0.25s ease both;
+}
+
+.trip-plan-rooms-reveal-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0;
+    font-size: var(--trip-caption);
+    font-weight: 600;
+    color: var(--trip-sage);
+    transition: color 0.15s ease;
+}
+
+.trip-plan-rooms-reveal-link:active {
+    color: var(--trip-accent);
+}
+
+.trip-plan-rooms-reveal-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
 /* —— Stay / accommodations —— */
 
 .trip-sleeping-plan-card {

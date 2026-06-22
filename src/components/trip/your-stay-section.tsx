@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, ChevronDown } from "@untitledui/icons";
+import { AlertTriangle, ChevronDown, HomeLine, XClose } from "@untitledui/icons";
 import { Button } from "@/components/base/buttons/button";
 import { HouseholdInitials } from "@/components/trip/household-initials";
 import { ROOM_LOCATION_LABELS, TRIP_ROOMS, type RoomLocation, type TripRoom } from "@/data/trip-content";
@@ -18,6 +18,15 @@ import { useTrip } from "@/providers/trip-provider";
 import { cx } from "@/utils/cx";
 
 const ALL_ROOMS_EXPANDED_KEY = "twain_harte_all_rooms_expanded";
+const ROOMS_DISMISSED_KEY = "twain_harte_rooms_dismissed";
+
+function readRoomsDismissed(): boolean {
+    try {
+        return localStorage.getItem(ROOMS_DISMISSED_KEY) === "true";
+    } catch {
+        return false;
+    }
+}
 
 function AssigneeList({
     assignees,
@@ -258,7 +267,7 @@ export function YourStaySection() {
     }
 
     return (
-        <div className="space-y-5">
+        <div className="trip-stay-content space-y-4">
             <SleepingPlanCard memberName={memberName} roomAssignments={roomAssignments} />
 
             <ClaimTbdSection memberName={memberName} roomAssignments={roomAssignments} onClaim={claimRoom} />
@@ -300,5 +309,75 @@ export function YourStaySection() {
                 )}
             </section>
         </div>
+    );
+}
+
+export function DismissableRoomsSection() {
+    const { memberName } = useTrip();
+    const [dismissed, setDismissed] = useState(() => readRoomsDismissed());
+
+    if (!memberName) return null;
+
+    function dismiss() {
+        try {
+            localStorage.setItem(ROOMS_DISMISSED_KEY, "true");
+        } catch {
+            /* storage unavailable */
+        }
+        setDismissed(true);
+    }
+
+    function show() {
+        try {
+            localStorage.removeItem(ROOMS_DISMISSED_KEY);
+        } catch {
+            /* storage unavailable */
+        }
+        setDismissed(false);
+    }
+
+    if (dismissed) {
+        return (
+            <p className="trip-plan-rooms-reveal">
+                <button type="button" className="trip-plan-rooms-reveal-link" onClick={show}>
+                    <HomeLine className="trip-plan-rooms-reveal-icon" aria-hidden />
+                    Show sleeping plan
+                </button>
+            </p>
+        );
+    }
+
+    return (
+        <section className="trip-plan-rooms-banner" aria-label="Your sleeping plan">
+            <header className="trip-plan-rooms-banner-header">
+                <div className="trip-plan-rooms-banner-title">
+                    <span className="trip-plan-rooms-banner-icon-wrap" aria-hidden>
+                        <HomeLine className="trip-plan-rooms-banner-icon" />
+                    </span>
+                    <div className="min-w-0">
+                        <h2 className="trip-plan-rooms-banner-heading">Your sleeping plan</h2>
+                        <p className="trip-plan-rooms-banner-desc">Where you and your household are staying</p>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    className="trip-icon-btn trip-plan-rooms-dismiss"
+                    onClick={dismiss}
+                    aria-label="Dismiss sleeping plan"
+                >
+                    <XClose aria-hidden />
+                </button>
+            </header>
+
+            <div className="trip-plan-rooms-banner-body">
+                <YourStaySection />
+            </div>
+
+            <footer className="trip-plan-rooms-banner-footer">
+                <Button color="secondary" size="sm" onClick={dismiss}>
+                    Got it
+                </Button>
+            </footer>
+        </section>
     );
 }
