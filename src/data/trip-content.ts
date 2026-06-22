@@ -121,7 +121,7 @@ export const DAYS: DayPlan[] = [
             {
                 icon: "📸",
                 title: "Family portraits",
-                body: "Golden hour. Coordinate outfits ahead of time. Keep the rest of the evening light.",
+                body: "6:30 PM — Golden hour. Coordinate outfits ahead of time. Keep the rest of the evening light.",
             },
         ],
     },
@@ -247,10 +247,10 @@ export const SPLITTABLE_ACTIVITIES: SplittableActivity[] = [
         id: "wed-portraits",
         dayId: "wed-24",
         title: "Family portraits",
-        description: "Golden hour at the house. Shower and change after the lake.",
+        description: "6:30 PM — Golden hour at the house. Shower and change after the lake.",
         emoji: "📸",
         defaultOptionId: "portraits",
-        options: [{ id: "portraits", label: "Portraits", description: "Coordinate outfits ahead of time" }],
+        options: [{ id: "portraits", label: "Portraits", description: "6:30 PM · Coordinate outfits ahead of time" }],
     },
     {
         id: "thu-hatchery",
