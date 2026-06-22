@@ -998,6 +998,67 @@ body {
     height: 1rem;
 }
 
+.trip-version-banner {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border-bottom: 0.5px solid var(--trip-separator);
+    background: color-mix(in srgb, var(--trip-accent) 14%, var(--trip-surface));
+    padding: 0.625rem 1rem;
+    padding-top: calc(0.625rem + env(safe-area-inset-top, 0px));
+}
+
+.trip-version-banner-text {
+    font-size: var(--trip-caption);
+    line-height: 1.45;
+    color: var(--trip-text-secondary);
+}
+
+.trip-version-banner-actions {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.trip-version-banner-refresh {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 999px;
+    background: var(--trip-accent);
+    padding: 0.375rem 0.75rem;
+    font-size: var(--trip-caption);
+    font-weight: 600;
+    color: var(--trip-surface);
+}
+
+.trip-version-banner-refresh svg {
+    width: 0.875rem;
+    height: 0.875rem;
+}
+
+.trip-version-banner-dismiss {
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    color: var(--trip-label);
+}
+
+.trip-version-banner-dismiss svg {
+    width: 1rem;
+    height: 1rem;
+}
+
 .trip-saved-toast {
     position: fixed;
     bottom: calc(var(--trip-tab-bar-offset) + 0.75rem);

@@ -51,6 +51,20 @@ Without Supabase, the app still works but saves **per device only**.
 
 Uses `HashRouter` (`/#/`) so routing works on static hosting.
 
+**Cache busting:** Vite hashes JS/CSS filenames on each build. Trip itinerary content ships in those bundles (not from Supabase). If the site looks stale after a deploy, the app polls `index.html` and shows a **Refresh** banner when a newer build is live. GitHub Pages cannot set custom `Cache-Control` headers, so cached HTML is the main risk — the banner handles that for family users.
+
+### Local preview after content edits
+
+```bash
+npm run build && npm run preview
+```
+
+If you still see old content:
+
+1. Rebuild (`npm run build`) — preview serves `dist/`, not live source.
+2. Hard refresh: **Cmd+Shift+R** (Mac) or **Ctrl+Shift+R** (Windows).
+3. Dev server (`npm run dev`) hot-reloads source; no service worker is registered.
+
 ### One-command helpers
 
 ```bash

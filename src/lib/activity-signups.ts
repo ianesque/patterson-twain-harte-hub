@@ -20,7 +20,7 @@ export interface ConfirmedAttendee {
 /** Legacy grouped activities → per-activity keys + option mapping */
 const LEGACY_ACTIVITY_MIGRATIONS: Record<
     string,
-    { optionToActivity: Record<string, string>; stayActivityId?: string }
+    { optionToActivity: Record<string, string>; stayActivityId?: string; targetDayId?: DayId }
 > = {
     "thu-25:thu-day": {
         optionToActivity: {
@@ -32,10 +32,25 @@ const LEGACY_ACTIVITY_MIGRATIONS: Record<
     },
     "thu-25:thu-evening": {
         optionToActivity: {
-            "movie-in": "thu-movie",
-            "movie-out": "thu-evening-home",
+            "movie-in": "fri-movie",
+            "movie-out": "fri-evening-home",
+        },
+        stayActivityId: "fri-evening-home",
+        targetDayId: "fri-26",
+    },
+    "thu-25:thu-game-evening": {
+        optionToActivity: {
+            "game-in": "thu-game-night",
+            "game-out": "thu-evening-home",
         },
         stayActivityId: "thu-evening-home",
+    },
+    "fri-26:fri-evening": {
+        optionToActivity: {
+            "movie-in": "fri-movie",
+            "movie-out": "fri-evening-home",
+        },
+        stayActivityId: "fri-evening-home",
     },
     "fri-26:fri-river": {
         optionToActivity: {
@@ -45,6 +60,12 @@ const LEGACY_ACTIVITY_MIGRATIONS: Record<
         },
         stayActivityId: "fri-pool",
     },
+};
+
+/** Direct signup keys renamed when activities moved Thu → Fri. */
+const RENAMED_SIGNUP_KEYS: Record<string, string> = {
+    "thu-25:thu-movie": "fri-26:fri-movie",
+    "thu-25:thu-evening-home": "fri-26:fri-evening-home",
 };
 
 const HOUSEHOLD_ALIASES: Record<string, string> = {
@@ -110,7 +131,7 @@ function migrateLegacySignups(signups: TripCollaborationState["activitySignups"]
         const households = next[legacyKey];
         if (!households) continue;
 
-        const dayId = legacyKey.split(":")[0] as DayId;
+        const dayId = (migration.targetDayId ?? legacyKey.split(":")[0]) as DayId;
 
         for (const [household, raw] of Object.entries(households)) {
             const plan = migrateActivityPlan(raw, household, { activitySignups: next, householdSizes: {} } as TripCollaborationState);
@@ -154,6 +175,13 @@ function migrateLegacySignups(signups: TripCollaborationState["activitySignups"]
         delete next[legacyKey];
     }
 
+    for (const [oldKey, newKey] of Object.entries(RENAMED_SIGNUP_KEYS)) {
+        const households = next[oldKey];
+        if (!households) continue;
+        next[newKey] = { ...(next[newKey] ?? {}), ...households };
+        delete next[oldKey];
+    }
+
     return next;
 }
 
@@ -178,7 +206,7 @@ export function normalizeActivitySignups(state: TripCollaborationState): TripCol
 
 export function findStayOption(activity: SplittableActivity) {
     return activity.options.find(
-        (o) => o.id === "pool-home" || o.id === "movie-out" || /stay/i.test(o.label),
+        (o) => o.id === "pool-home" || o.id === "movie-out" || o.id === "game-out" || /stay/i.test(o.label),
     );
 }
 

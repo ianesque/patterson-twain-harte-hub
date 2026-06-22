@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { HashRouter, Route, Routes } from "react-router";
 import { PasswordGate } from "@/components/trip/password-gate";
+import { VersionUpdateBanner } from "@/components/version-update-banner";
 import { isAuthenticated } from "@/lib/auth";
 import { TripHubPage } from "@/pages/trip-hub";
 import { RouteProvider } from "@/providers/router-provider";
@@ -12,6 +13,7 @@ export function App() {
     if (!authed) {
         return (
             <ThemeProvider>
+                <VersionUpdateBanner />
                 <PasswordGate onSuccess={() => setAuthed(true)} />
             </ThemeProvider>
         );
@@ -19,6 +21,7 @@ export function App() {
 
     return (
         <ThemeProvider>
+            <VersionUpdateBanner />
             <HashRouter>
                 <RouteProvider>
                     <Routes>

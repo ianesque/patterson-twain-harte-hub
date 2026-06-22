@@ -129,11 +129,11 @@ export const DAYS: DayPlan[] = [
         id: "thu-25",
         weekday: "THU",
         dayNum: "25",
-        title: "Fish & feed trout",
-        theme: "Hatchery · fishing · pool · movie night",
+        title: "Fish & feed trout → Game Night",
+        theme: "Hatchery · fishing · pool · Game Night",
         tag: "Easy day",
         tagTone: "easy",
-        effortAccess: "Hatchery is flat and paved. Lyons has easy bank fishing. Bring layers for the outdoor movie.",
+        effortAccess: "Hatchery is flat and paved. Lyons has easy bank fishing. Game Night at the pool — not everyone has to get wet.",
         rows: [
             {
                 icon: "🐟",
@@ -148,12 +148,12 @@ export const DAYS: DayPlan[] = [
             {
                 icon: "🏊",
                 title: "Pool afternoon",
-                body: "Quiet time before Friday.",
+                body: "Quiet time at base camp before Game Night tonight.",
             },
             {
-                icon: "🎬",
-                title: "Movies Under the Stars",
-                body: "Pinecrest amphitheater, ~8:30 PM. Blankets, low chairs, jackets.",
+                icon: "🎉",
+                title: "Game Night",
+                body: "Thursday at the pool. Wet relay + Family Feud — see the Guide tab for the plan.",
             },
         ],
     },
@@ -161,11 +161,11 @@ export const DAYS: DayPlan[] = [
         id: "fri-26",
         weekday: "FRI",
         dayNum: "26",
-        title: "River day → Game Night",
-        theme: "Float or River Ranch · pool games tonight",
+        title: "River day → movie night",
+        theme: "Float or River Ranch · Movies Under the Stars",
         tag: "Pick your level",
         tagTone: "mod",
-        effortAccess: "Knights Ferry is a long float — swimming required. River Ranch is closer and mellow. Pool day always works.",
+        effortAccess: "Knights Ferry is a long float — swimming required. River Ranch is closer and mellow. Bring layers for the outdoor movie.",
         rows: [
             {
                 icon: "🌊",
@@ -178,9 +178,9 @@ export const DAYS: DayPlan[] = [
                 body: "~20 min. River swim, horseshoes, volleyball. Keeps the group closer.",
             },
             {
-                icon: "🎉",
-                title: "Game Night",
-                body: "Friday at the pool. See the Guide tab for the plan.",
+                icon: "🎬",
+                title: "Movies Under the Stars",
+                body: "The Mandalorian and Grogu at Pinecrest amphitheater, Friday ~8:30 PM. $10 tickets. Blankets, low chairs, jackets.",
             },
         ],
     },
@@ -280,22 +280,22 @@ export const SPLITTABLE_ACTIVITIES: SplittableActivity[] = [
         options: [{ id: "pool-home", label: "Pool at the house", description: "Afternoon at base camp" }],
     },
     {
-        id: "thu-movie",
+        id: "thu-game-night",
         dayId: "thu-25",
-        title: "Outdoor movie",
-        description: "Movies Under the Stars at Pinecrest · ~8:30 PM. Bring layers.",
-        emoji: "🎬",
-        defaultOptionId: "movie-in",
-        options: [{ id: "movie-in", label: "Outdoor movie", description: "Pinecrest amphitheater · blankets & jackets" }],
+        title: "Game Night",
+        description: "Thursday at the pool. Wet relay + Family Feud — see Guide for the plan.",
+        emoji: "🎉",
+        defaultOptionId: "game-in",
+        options: [{ id: "game-in", label: "Game Night", description: "At the pool · mix ages on each team" }],
     },
     {
         id: "thu-evening-home",
         dayId: "thu-25",
         title: "Stay at the house (evening)",
-        description: "Pool time or an early night while others catch the movie.",
+        description: "Quiet evening while others play at the pool for Game Night.",
         emoji: "🏠",
-        defaultOptionId: "movie-out",
-        options: [{ id: "movie-out", label: "Stay at the house", description: "Pool or early night" }],
+        defaultOptionId: "game-out",
+        options: [{ id: "game-out", label: "Stay at the house", description: "Skip Game Night · early night" }],
     },
     {
         id: "fri-knights-ferry",
@@ -330,10 +330,34 @@ export const SPLITTABLE_ACTIVITIES: SplittableActivity[] = [
         defaultOptionId: "pool-home",
         options: [{ id: "pool-home", label: "Stay at the house", description: "Pool day at base camp" }],
     },
+    {
+        id: "fri-movie",
+        dayId: "fri-26",
+        title: "The Mandalorian and Grogu",
+        description: "Movies Under the Stars at Pinecrest · Friday ~8:30 PM · $10 tickets. Bring layers.",
+        emoji: "🎬",
+        defaultOptionId: "movie-in",
+        options: [
+            {
+                id: "movie-in",
+                label: "The Mandalorian and Grogu",
+                description: "Pinecrest amphitheater · $10 · blankets & jackets",
+            },
+        ],
+    },
+    {
+        id: "fri-evening-home",
+        dayId: "fri-26",
+        title: "Stay at the house (evening)",
+        description: "Pool time or early night while others catch the movie.",
+        emoji: "🏠",
+        defaultOptionId: "movie-out",
+        options: [{ id: "movie-out", label: "Stay at the house", description: "Pool or early night" }],
+    },
 ];
 
 /** Stay-home / pool options — informational in Plan, not RSVP cards. */
-const STAY_HOME_ACTIVITY_IDS = new Set(["thu-pool", "thu-evening-home", "fri-pool"]);
+const STAY_HOME_ACTIVITY_IDS = new Set(["thu-pool", "thu-evening-home", "fri-pool", "fri-evening-home"]);
 
 export function isStayHomeActivity(activity: SplittableActivity): boolean {
     return STAY_HOME_ACTIVITY_IDS.has(activity.id);
@@ -425,8 +449,8 @@ export const LOCAL_GEMS: { section: string; cards: ActivityCard[] }[] = [
         cards: [
             {
                 title: "Movies Under the Stars",
-                distance: "Pinecrest · ~30 min",
-                body: "Outdoor movie by the lake. Starts ~8:30 PM.",
+                distance: "Pinecrest · ~30 min · Friday",
+                body: "The Mandalorian and Grogu — outdoor movie by the lake. Starts ~8:30 PM.",
                 lines: ["$10 · kids 2 and under free"],
                 badges: [
                     { label: "All ages", tone: "sr" },
@@ -561,14 +585,14 @@ export const CHECKLIST: ChecklistDef[] = [
     },
     {
         key: "game",
-        title: "Game Night supplies (by Friday)",
+        title: "Game Night supplies (by Thursday)",
         detail: "See Guide → Game Night for the list.",
         priority: "flex",
     },
 ];
 
 export const GAME_NIGHT = {
-    intro: "Friday at the pool. Mix ages on each team — not everyone has to get wet.",
+    intro: "Thursday at the pool. Mix ages on each team — not everyone has to get wet.",
     format: "Three teams of ~6. Wet relay first, then dry Family Feud. Tally points across both.",
     stations: [
         { name: "Noodle Joust", points: "+10", detail: "Foam noodles on pool floats — knock the other rider off." },
@@ -706,6 +730,6 @@ export const TRIP_ROOMS: TripRoom[] = [
 export const SUGGESTED_DINNERS: Partial<Record<DayId, string>> = {
     "tue-23": "Easy dinner at the house",
     "wed-24": "Simple meal after portraits",
-    "thu-25": "Grill or pasta",
-    "fri-26": "Finger food before Game Night",
+    "thu-25": "Finger food before Game Night",
+    "fri-26": "Easy dinner — movie at 8:30 PM",
 };
