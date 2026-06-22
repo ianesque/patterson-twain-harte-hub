@@ -966,38 +966,6 @@ body {
     font-style: italic;
 }
 
-.trip-sync-tip {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    border-bottom: 0.5px solid var(--trip-separator);
-    background: var(--trip-accent-soft);
-    padding: 0.625rem 0;
-}
-
-.trip-sync-tip-text {
-    font-size: var(--trip-caption);
-    line-height: 1.45;
-    color: var(--trip-text-secondary);
-}
-
-.trip-sync-tip-dismiss {
-    display: inline-flex;
-    width: 2rem;
-    height: 2rem;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    color: var(--trip-label);
-}
-
-.trip-sync-tip-dismiss svg {
-    width: 1rem;
-    height: 1rem;
-}
-
 .trip-version-banner {
     position: fixed;
     top: 0;

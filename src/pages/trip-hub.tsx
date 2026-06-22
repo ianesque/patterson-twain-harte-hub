@@ -13,7 +13,7 @@ import { MealsPanel } from "@/components/trip/meals-panel";
 import { HouseholdInitials } from "@/components/trip/household-initials";
 import { MemberPicker } from "@/components/trip/member-picker";
 import { PlanPanel } from "@/components/trip/plan-panel";
-import { SavedToast, SyncTipBanner } from "@/components/trip/sync-feedback";
+import { SavedToast } from "@/components/trip/sync-feedback";
 import { getTripHeroContext, TripMobileTabBar, TripSegmentedTabs } from "@/components/trip/trip-ui";
 import { TRIP_META } from "@/data/trip-content";
 import { clearStoredMember } from "@/lib/auth";
@@ -98,12 +98,6 @@ function TripShell() {
             {!isSupabaseConfigured && (
                 <div className="border-b border-[var(--trip-separator)] bg-secondary px-4 py-2 text-center text-[var(--trip-caption)] text-tertiary">
                     Offline mode — changes stay on this device only
-                </div>
-            )}
-
-            {isSupabaseConfigured && (
-                <div className="mx-auto max-w-5xl px-4 sm:px-6">
-                    <SyncTipBanner />
                 </div>
             )}
 
